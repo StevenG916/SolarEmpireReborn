@@ -73,9 +73,9 @@ if(isset($send_message)){
 		$out_str .= quick_row("Total Accounts:","$serv1[0]");
 		$out_str .= quick_row("Total Logins:","$serv1[1]");
 		$out_str .= quick_row("Total page views:","$serv1[3]");
-		$out_str .= quick_row("Avg. Logins/Player:",number_format($serv1[1]/$serv1[0],2));
-		$out_str .= quick_row("Avg. Games Joined/Player:",number_format($serv1[2]/$serv1[0],2));
-		$out_str .= quick_row("Avg. Page Views/Player:",number_format($serv1[3]/$serv1[0],2));
+		$out_str .= quick_row("Avg. Logins/Player:", $serv1[0] ? number_format($serv1[1]/$serv1[0],2) : "0");
+		$out_str .= quick_row("Avg. Games Joined/Player:", $serv1[0] ? number_format($serv1[2]/$serv1[0],2) : "0");
+		$out_str .= quick_row("Avg. Page Views/Player:", $serv1[0] ? number_format($serv1[3]/$serv1[0],2) : "0");
 		$out_str .= "</table><br><br><br>";
 
 		$out_str .= "<b class=b1>MySQL Server Details</b><br>".preg_replace("/  /","<br>", mysqli_stat($GLOBALS['database_link']));
@@ -133,50 +133,50 @@ if(isset($send_message)){
 			$out_str .= quick_row("Players","<b>".($ct[0])."</b>");
 			$out_str .= quick_row("Players Alive",calc_perc($ct2[0],$ct[0]));
 			$out_str .= quick_row("Cash",number_format($ct[1]));
-			$out_str .= quick_row("Cash Average",number_format(round(($ct[1] * 100/$ct[0]) / 100)));
+			$out_str .= quick_row("Cash Average", $ct[0] ? number_format(round(($ct[1] * 100/$ct[0]) / 100)) : "0");
 			$out_str .= quick_row("Turns",$ct[2]);
-			$out_str .= quick_row("Turns Average",number_format($ct[2]/$ct[0]),2);
+			$out_str .= quick_row("Turns Average", $ct[0] ? number_format($ct[2]/$ct[0],2) : "0");
 			$out_str .= quick_row("Turns Run",$ct[3]);
-			$out_str .= quick_row("Turns Run Average",number_format($ct[3]/$ct[0]),2);
+			$out_str .= quick_row("Turns Run Average", $ct[0] ? number_format($ct[3]/$ct[0],2) : "0");
 			$out_str .= "</table></td><td>";
 			#new grid
 
 			$out_str .= make_table(array("",""));
 			$out_str .= quick_row("Ships","<b>$ct3[0]</b>");
-			$out_str .= quick_row("Ships Average",round($ct3[0]/$ct[0]));
+			$out_str .= quick_row("Ships Average", $ct[0] ? round($ct3[0]/$ct[0]) : "0");
 			$out_str .= quick_row("Fighters",$ct3[1]);
-			$out_str .= quick_row("Avg. Fighters/Ship",round(($ct3[1] * 100/$ct3[0]) / 100));
+			$out_str .= quick_row("Avg. Fighters/Ship", $ct3[0] ? round(($ct3[1] * 100/$ct3[0]) / 100) : "0");
 			$out_str .= "</table><br>";
 
 			$out_str .= make_table(array("",""));
 			$out_str .= quick_row("Planets","<b>$ct4[0]</b>");
-			$out_str .= quick_row("Planets Average",number_format($ct4[0]/$ct[0],3));
+			$out_str .= quick_row("Planets Average", $ct[0] ? number_format($ct4[0]/$ct[0],3) : "0");
 			$out_str .= quick_row("Planet Colonists","<b>$ct4[2]</b>");
 			$out_str .= quick_row("Planet Metal","<b>$ct4[4]</b>");
 			$out_str .= quick_row("Planet Fuel","<b>$ct4[5]</b>");
 			$out_str .= quick_row("Planet Electronics","<b>$ct4[3]</b>");
 			$out_str .= quick_row("Planet Fighters",$ct4[1]);
-			if($ct4[1] > 0){
+			if($ct4[1] > 0 && $ct4[0] > 0){
 				$out_str .= quick_row("Fighters Average",number_format(($ct4[1] * 100/$ct4[0]) / 100,2));
 			} else {
-				$out_str .= quick_row("Fighters Average","0%)");
+				$out_str .= quick_row("Fighters Average","0");
 			}
 			$out_str .= "</table></td><td>";
 			#new grid
 
 			$out_str .= make_table(array("",""));
 			$out_str .= quick_row("Kills",$ct[4]);
-			$out_str .= quick_row("Kills Average",round(($ct[4] * 100/$ct[0]) / 100));
+			$out_str .= quick_row("Kills Average", $ct[0] ? round(($ct[4] * 100/$ct[0]) / 100) : "0");
 			$out_str .= quick_row("Fighters Killed",$ct['killed_fighters']);
-			$out_str .= quick_row("Fighters Killed Average",round(($ct['killed_fighters'] * 100/$ct[0]) / 100));
+			$out_str .= quick_row("Fighters Killed Average", $ct[0] ? round(($ct['killed_fighters'] * 100/$ct[0]) / 100) : "0");
 			$out_str .= quick_row("Fighters Lost",$ct['lost_fighters']);
-			$out_str .= quick_row("Fighters Lost Average",round(($ct['lost_fighters'] * 100/$ct[0]) / 100));
+			$out_str .= quick_row("Fighters Lost Average", $ct[0] ? round(($ct['lost_fighters'] * 100/$ct[0]) / 100) : "0");
 
 			$out_str .= "</table><br>";
 			$out_str .= make_table(array("",""));
 			$out_str .= quick_row("Clans","<b>$ct5[0]</b>");
 			$out_str .= quick_row("Total Clan <br>Membership",$ct5[1]);
-			if($ct5[1] > 0){
+			if($ct5[1] > 0 && $ct5[0] > 0){
 				$out_str .= quick_row("Average Clan <br>Membership",round(($ct5[1] * 100/$ct5[0]) / 100));
 			}
 			$out_str .= "</table><br><br>";
