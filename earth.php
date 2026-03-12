@@ -44,7 +44,7 @@ if(isset($all_colon) && $user['ship_id'] != NULL){
 	} else {
 		take_cash($cost_colonist*$amount);
 		charge_turns(1);
-		dbn("update ${db_name}_ships set colon = colon + $amount where ship_id = $user[ship_id]");
+		dbn("update {$db_name}_ships set colon = colon + $amount where ship_id = $user[ship_id]");
 		$user_ship['colon'] += $amount;
 		$user_ship['empty_bays'] -= $amount;
 	}
@@ -77,10 +77,10 @@ if(isset($ship_shop)) {
 			$bat_text .= make_row(array("<a href=ship_build.php?ship_type=$type_id>$ship_stats[name]</a>", "$ship_stats[class_abbr]","<b>$ship_stats[cost]</b>", "<a href=ship_build.php?ship_type=$type_id>Buy One</a>", "$link<b></b></a>"));
 		} elseif($ship_stats['type'] == "Raider") {
 			$rd_text .= make_row(array("<a href=ship_build.php?ship_type=$type_id>$ship_stats[name]</a>", "$ship_stats[class_abbr]", "<b>$ship_stats[cost]</b>", "$link<b></b></a>","<b>$ship_stats[cost]</b>", "<a href=ship_build.php?ship_type=$type_id>Buy One</a>", "$link<b></b></a>"));
-		} elseif(eregi("Carrier",$ship_stats['type'])) {
+		} elseif(str_contains($ship_stats['type'], 'Carrier')) {
 			$car_text .= make_row(array("<a href=ship_build.php?ship_type=$type_id>$ship_stats[name]</a>", "$ship_stats[class_abbr]", "<b>$ship_stats[cost]</b>", "<a href=ship_build.php?ship_type=$type_id>Buy One</a>", "$link<b></b></a>"));
 		} else {
-			if($user['one_brob'] > 0 && eregi("oo",$ship_stats['config'])) {
+			if($user['one_brob'] > 0 && str_contains($ship_stats['config'], 'oo')) {
 				$ship_stats['cost'] = $ship_stats['cost'] * $user['one_brob'];
 			}
 			$other_text .= make_row(array("<a href=ship_build.php?ship_type=$type_id>$ship_stats[name]</a>", "$ship_stats[class_abbr]", "$ship_stats[type]", "<b>$ship_stats[cost]</b>", "<a href=ship_build.php?ship_type=$type_id>Buy One</a>", "$link<b></b></a>"));

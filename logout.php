@@ -15,14 +15,14 @@ if ($login_id == ADMIN_ID) {
 //logout FROM GAME. to either gamelisting or index
 } elseif(isset($logout_single_game) || isset($comp_logout)){
 
-	dbn("update ${db_name}_users set on_planet = 0 where login_id = '$login_id'");
+	dbn("update {$db_name}_users set on_planet = 0 where login_id = '$login_id'");
 	dbn("update user_accounts set in_game = '' where login_id = '$login_id'");
 	SetCookie("p_pass","",0);
 
 	//Update score, and last_request
 	score_func($login_id,0);
 	$time_to_set = time() - 1800; //30 mins ago
-	dbn("update ${db_name}_users set last_request = '$time_to_set' where login_id = '$login_id'");
+	dbn("update {$db_name}_users set last_request = '$time_to_set' where login_id = '$login_id'");
 
 
 	//only logging out to gamelisting

@@ -44,39 +44,39 @@ if(isset($retire)) {
 		get_var('Retire','location.php','<p><b class=b1>Warning!</b> This will permanently remove your account from this game. <br>Are you sure you want to retire?','sure','yes');
 	} else {
 	if ($user[clan_id] > 0) {
-		db("select leader_id,members from ${db_name}_clans where clan_id = $user[clan_id]");
+		db("select leader_id,members from {$db_name}_clans where clan_id = $user[clan_id]");
 		$clan = dbr();
 		if($clan[members] > 1 && $user[login_id] == $clan[leader_id] && !$what_to_do){
 			$new_page = "Before you retire you must first select whether you want your clan to be disbanded, or assign a new leader to it:";
 			$new_page .= "<form action=location.php method=POST name=retiring>";
-			while (list($var, $value) = each($_POST)) {
+			foreach ($_POST as $var => $value) {
 				$new_page .= "<input type=hidden name=$var value='$value'>";
 			}
 			$new_page .= "<p>Disband Clan <INPUT type=radio name=what_to_do value=1 CHECKED> / Assign New Clan Leader<INPUT type=radio name=what_to_do value=2><p><INPUT type=submit value='Submit'></form>";
 			print_page("Retiring",$new_page);
 		} elseif($clan[members] < 2 || $what_to_do == 1){
 
-			dbn("update ${db_name}_users set clan_id = 0 where clan_id = $user[clan_id]");
-			dbn("update ${db_name}_planets set clan_id = -1 where clan_id = $user[clan_id]");
-			dbn("delete from ${db_name}_clans where clan_id = $user[clan_id]");
-			dbn("delete from ${db_name}_messages where clan_id = $user[clan_id]");
+			dbn("update {$db_name}_users set clan_id = 0 where clan_id = $user[clan_id]");
+			dbn("update {$db_name}_planets set clan_id = -1 where clan_id = $user[clan_id]");
+			dbn("delete from {$db_name}_clans where clan_id = $user[clan_id]");
+			dbn("delete from {$db_name}_messages where clan_id = $user[clan_id]");
 		} elseif($what_to_do == 2 && !$leader_id){
 			$new_page = "Please select which of the below you would like to be the new clan leader:";
 			$new_page .= "<form action=location.php method=POST name=retiring2>";
 			#$new_page .= "<input type=hidden name=what_to_do value='$what_to_do'>";
-			db2("select login_id,login_name from ${db_name}_users where clan_id = '$user[clan_id]' && login_id != '$user[login_id]'");
+			db2("select login_id,login_name from {$db_name}_users where clan_id = '$user[clan_id]' && login_id != '$user[login_id]'");
 			$new_page .= "<select name=leader_id>";
 			while ($member_name = dbr2()) {
 				$new_page .= "<option value=$member_name[login_id]>$member_name[login_name]</option>";
 			}
 			$new_page .= "</select>";
-			while (list($var, $value) = each($_POST)) {
+			foreach ($_POST as $var => $value) {
 				$new_page .= "<input type=hidden name=$var value='$value'>";
 			}
 			$new_page .= "<p><INPUT type=submit value='Submit'></form>";
 			print_page("Assign New Clan Leader",$new_page);
 		} else{
-				//dbn("update ${db_name}_clans set leader_id = $leader_id where clan_id = $user[clan_id]");
+				//dbn("update {$db_name}_clans set leader_id = $leader_id where clan_id = $user[clan_id]");
 		}
 	}
 
@@ -109,7 +109,7 @@ END;
 		echo "<p>You are out of the game for <b>$hours_after_death</b> hours.";
 	} else {
 		give_cash(3000);
-		mysql_db_query($database,"update ${db_name}_users set ship_id = 2 where login_id = $user[login_id]") or die("Failure in mysql_db_query function: ".mysql_error());
+		dbn("update {$db_name}_users set ship_id = 2 where login_id = $user[login_id]");
 		echo "<p>Name your new ship.";
 		echo "<form action=ship_build.php method=POST>";
 		echo "<input type=hidden name=ship_type value=$start_ship>";
@@ -125,18 +125,18 @@ sudden_death_check($user);
 
 // Check for on_planet
 if($user['on_planet'] != 0) {
-	dbn("update ${db_name}_users set on_planet = 0 where login_id = $user[login_id]");
+	dbn("update {$db_name}_users set on_planet = 0 where login_id = $user[login_id]");
 	$user['on_planet'] = 0;
 }
 
 //Tow all
 if(isset($towall)) {
 	if($towall == 1) {
-		dbn("update ${db_name}_ships set towed_by = '$user[ship_id]' where location = '$user[location]' && login_id = '$user[login_id]' && ship_id != '$user[ship_id]'");
+		dbn("update {$db_name}_ships set towed_by = '$user[ship_id]' where location = '$user[location]' && login_id = '$user[login_id]' && ship_id != '$user[ship_id]'");
 	$error_str .= "Ships in Tow";
 	}
 	elseif($towall == 2) {
-	dbn("update ${db_name}_ships set towed_by = '0' where location = '$user[location]' && login_id = '$user[login_id]'");
+	dbn("update {$db_name}_ships set towed_by = '0' where location = '$user[location]' && login_id = '$user[login_id]'");
 	$error_str .= "Ships Released";
 	}
 	else {
@@ -151,12 +151,12 @@ if(isset($tow_release)){
 		$q_m = 0;
 		if(isset($do_ship_type)) {
 			foreach($do_ship_type as $var) {
-				dbn("update ${db_name}_ships set towed_by = '$user[ship_id]' where shipclass = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
-				$q_m += mysql_affected_rows();
+				dbn("update {$db_name}_ships set towed_by = '$user[ship_id]' where shipclass = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
+				$q_m += mysqli_affected_rows($GLOBALS['database_link']);
 			}
 		} else {
 			foreach($do_ship as $var) {
-				dbn("update ${db_name}_ships set towed_by = '$user[ship_id]' where ship_id = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
+				dbn("update {$db_name}_ships set towed_by = '$user[ship_id]' where ship_id = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
 				$q_m++;
 			}
 		}
@@ -165,12 +165,12 @@ if(isset($tow_release)){
 		$q_m = 0;
 		if(isset($do_ship_type)) {
 			foreach($do_ship_type as $var) {
-				dbn("update ${db_name}_ships set towed_by = '0' where shipclass = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
-				$q_m += mysql_affected_rows();
+				dbn("update {$db_name}_ships set towed_by = '0' where shipclass = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
+				$q_m += mysqli_affected_rows($GLOBALS['database_link']);
 			}
 		} else {
 			foreach($do_ship as $var) {
-				dbn("update ${db_name}_ships set towed_by = '0' where ship_id = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
+				dbn("update {$db_name}_ships set towed_by = '0' where ship_id = '$var' && login_id = '$user[login_id]' && location='$user[location]'");
 				$q_m++;
 			}
 		}
@@ -184,7 +184,7 @@ if(!empty($command)) {
 	if($command==0 || $command==1){
 		print_page("Error","It is not possible to command this ship.");
 	}
-	db("select * from ${db_name}_ships where ship_id = $command");
+	db("select * from {$db_name}_ships where ship_id = $command");
 	$temp_ship = dbr(1);
 	if($temp_ship['login_id'] == $user['login_id']) {
 		if($temp_ship['location'] != $user['location']) {
@@ -210,7 +210,7 @@ if(!empty($command)) {
 		} else {
 			$error_str .= "Command Transfered.<p>";
 		}
-		dbn("update ${db_name}_users set ship_id = '$command', location = '$temp_ship[location]' where login_id = $user[login_id]");
+		dbn("update {$db_name}_users set ship_id = '$command', location = '$temp_ship[location]' where login_id = $user[login_id]");
 		$user['ship_id'] = $command;
 	$user['location'] = $temp_ship[location];
 	get_star();
@@ -222,7 +222,7 @@ if(!empty($command)) {
 
 //Transwarp Burst
 if(!empty($transburst)) {
-	if(!ereg("tw",$user_ship['config'])) {
+	if(!str_contains($user_ship['config'],"tw")) {
 		print_page("Transwarp","Your ship is not equipped with a Transwarp Drive.");
 	} elseif($user['turns'] < 15) {
 		print_page("Transwarp","You need <b>15</b> turns to use Transwarp Burst");
@@ -231,11 +231,11 @@ if(!empty($transburst)) {
 	}
 
 	$new_loc = random_system_num(); #make a random system number up.
-	dbn("update ${db_name}_users set location = $new_loc where login_id = $user[login_id]");
-	dbn("update ${db_name}_ships set location = $new_loc,mine_mode = 0 where ship_id = $user[ship_id]");
+	dbn("update {$db_name}_users set location = $new_loc where login_id = $user[login_id]");
+	dbn("update {$db_name}_ships set location = $new_loc,mine_mode = 0 where ship_id = $user[ship_id]");
 
 	if($user_ship['ship_id']) {
-		dbn("update ${db_name}_ships set location = '$new_loc',mine_mode = 0 where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
+		dbn("update {$db_name}_ships set location = '$new_loc',mine_mode = 0 where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
 	}
 
 	$error_str .= "You and all towed ships have ended up in system <b class=b1>#$new_loc</b>";
@@ -254,11 +254,11 @@ if(!empty($transwarp)) {
 #	$tw_distance = 15;
 	#max distance jumped is based on the size of the universe.
 	$tw_distance = round($uv_universe_size / 35);
-	db("select count(star_id) from ${db_name}_stars");
+	db("select count(star_id) from {$db_name}_stars");
 	$num_ss1 = dbr();
 	$num_ss = $num_ss1[0];
 
-	db("select count(ship_id) from ${db_name}_ships where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
+	db("select count(ship_id) from {$db_name}_ships where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
 		$temp545 = dbr();
 	$ship_count = $temp545[0];
 	if($ship_warp_cost > 1){
@@ -268,11 +268,11 @@ if(!empty($transwarp)) {
 		$mathstuff = round((get_star_dist($user['location'],$transwarp) + $ship_count) / 4) + 1;
 	}
 
-	if(!ereg("tw",$user_ship['config'])) {
+	if(!str_contains($user_ship['config'],"tw")) {
 		print_page("Transwarp","Your ship is not equipped with a transwarp drive.");
 	} elseif($transwarp == $user['location']) {
 		$user_loc_message = "You're already there!";
-	} elseif(($transwarp == "") || (!eregi("[0-9]{1,3}",$transwarp)) || ($transwarp > $num_ss)) {
+	} elseif(($transwarp == "") || (!preg_match("/^[0-9]{1,3}$/",$transwarp)) || ($transwarp > $num_ss)) {
 		print_page("Transwarp","Invalid transwarp destination.");
 	} elseif(get_star_dist($user['location'],$transwarp) > $tw_distance) {
 		print_page("Transwarp","Your Transwarp drive cannot warp that far. Maximum Transwarp distance of $tw_distance Light Years.");
@@ -280,11 +280,11 @@ if(!empty($transwarp)) {
 		print_page("Transwarp","You need <b>$mathstuff</b> turns to warp that far.");
 	} elseif($transwarp != $user[location]) {
 		//$mathstuff1 = get_star_dist($user[location],$transwarp);
-		dbn("update ${db_name}_users set location = $transwarp where login_id = $user[login_id]");
-		dbn("update ${db_name}_ships set location = $transwarp,mine_mode = 0 where ship_id = $user[ship_id]");
+		dbn("update {$db_name}_users set location = $transwarp where login_id = $user[login_id]");
+		dbn("update {$db_name}_ships set location = $transwarp,mine_mode = 0 where ship_id = $user[ship_id]");
 
 		if($user_ship[ship_id]) {
-			dbn("update ${db_name}_ships set location = '$transwarp',mine_mode = 0 where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
+			dbn("update {$db_name}_ships set location = '$transwarp',mine_mode = 0 where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
 
 			charge_turns($mathstuff);
 			$user_ship['mine_mode'] = 0;
@@ -303,35 +303,35 @@ if(!empty($transwarp)) {
 
 //subspace jump
 if(!empty($subspace)) {
-	db("select count(ship_id) from ${db_name}_ships where towed_by = '$user_ship[ship_id]' && location = '$user_ship[location]' && ship_id != '$user[ship_id]' && login_id = '$user[login_id]'");
+	db("select count(ship_id) from {$db_name}_ships where towed_by = '$user_ship[ship_id]' && location = '$user_ship[location]' && ship_id != '$user[ship_id]' && login_id = '$user[login_id]'");
 	$num_towed1 = dbr();
 	$num_towed = $num_towed1[0];
 
-	db("select count(star_id) from ${db_name}_stars");
+	db("select count(star_id) from {$db_name}_stars");
 	$num_ss = dbr();
 	$turn = get_star_dist($user[location],$subspace)/2 +1;
-	if(!ereg("sj",$user_ship['config'])) {
+	if(!str_contains($user_ship['config'],"sj")) {
 		print_page("Sub-Space","This does not have a Sub-Space Jump Drive.");
 	} elseif($subspace == $user[location]) {
 		$error_str = "You're already there!";
 	} elseif($user[turns] < $turn) {
 		print_page("Sub-Space","You need <b>$turn</b> turns to get that far");
-	} elseif($num_towed > 10 && !ereg("ws",$user_ship['config'])) {
+	} elseif($num_towed > 10 && !str_contains($user_ship['config'],"ws")) {
 		print_page("Sub-Space","You can only tow <b>10 </b>ships through subspace, you are towing <b>$num_towed</b>.<br><br>To have unlimited tow capability, purchase and install the <b class=b1>Wormhole Stabiliser</b> Upgrade.");
 	} elseif($subspace > $num_ss[0] || $subspace <= 0) {
 		print_page("Sub-Space","Where are you trying to go? That location doesn't excist. You can only go from systems <b>1</b> to <b>$num_ss[0] </b>using any form of transport.");
 	} else {
-		dbn("update ${db_name}_users set location = $subspace where login_id = $user[login_id]");
-		dbn("update ${db_name}_ships set location = $subspace,mine_mode = 0 where ship_id = $user[ship_id]");
+		dbn("update {$db_name}_users set location = $subspace where login_id = $user[login_id]");
+		dbn("update {$db_name}_ships set location = $subspace,mine_mode = 0 where ship_id = $user[ship_id]");
 
 		$user_ship[mine_mode] = 0;
 		if($user_ship[ship_id]) {
-			dbn("update ${db_name}_ships set location = '$subspace',mine_mode = 0 where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
+			dbn("update {$db_name}_ships set location = '$subspace',mine_mode = 0 where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]'");
 		}
 
 		charge_turns($turn);
-		dbn("update ${db_name}_users set location = $subspace where login_id = $user[login_id]");
-		dbn("update ${db_name}_ships set location = $subspace,mine_mode = 0 where ship_id = $user[ship_id]");
+		dbn("update {$db_name}_users set location = $subspace where login_id = $user[login_id]");
+		dbn("update {$db_name}_ships set location = $subspace,mine_mode = 0 where ship_id = $user[ship_id]");
 
 		$user['location'] = $subspace;
 		$user_ship['location'] = $subspace;
@@ -353,7 +353,7 @@ if(isset($toloc)) {
 		if($user['ship_id'] == NULL){ //ship destroyed warp cost in turns
 			$warp_cost = 1;
 		} else {
-			db("select move_turn_cost from ${db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && (towed_by = '$user[ship_id]' || ship_id = '$user[ship_id]') order by move_turn_cost desc limit 1");
+			db("select move_turn_cost from {$db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && (towed_by = '$user[ship_id]' || ship_id = '$user[ship_id]') order by move_turn_cost desc limit 1");
 			$move_turn_cost_fleet = dbr();
 			$warp_cost = $move_turn_cost_fleet['move_turn_cost']; #set it to warp_cost so can keep generic
 		}
@@ -380,23 +380,23 @@ if(isset($toloc)) {
 			$error_str = "This star system does not have a link to (#<b>$toloc</b>).<p>";
 		} else {
 			charge_turns($warp_cost);
-			dbn("update ${db_name}_users set location = '$toloc' where login_id = '$user[login_id]'");
+			dbn("update {$db_name}_users set location = '$toloc' where login_id = '$user[login_id]'");
 
 			if($user['ship_id'] != NULL){
-				if(eregi("br",$user_ship['config'])) {
+				if(str_contains($user_ship['config'],"br")) {
 					$space = empty_bays();
 					$collected = mt_rand(1,3);
 					if($collected >= $space) {
 						$collected = $space;
 					}
-					dbn("update ${db_name}_ships set fuel = fuel + $collected where ship_id = $user[ship_id]");
+					dbn("update {$db_name}_ships set fuel = fuel + $collected where ship_id = $user[ship_id]");
 					$user_ship['fuel'] += $collected;
 				}
 
 				#simpler & quicker version of ramscooping.
 				#ramscooping using the mammoth ramjet
 				$temp056 = mt_rand(1,3);
-				dbn("update ${db_name}_ships set fuel = fuel + '$temp056' where shipclass = 301 && (ship_id = '$user_ship[ship_id]' || (towed_by = '$user_ship[ship_id]' && location = '$user[location]' && (cargo_bays - metal-fuel-elect-organ-colon) > $temp056))");
+				dbn("update {$db_name}_ships set fuel = fuel + '$temp056' where shipclass = 301 && (ship_id = '$user_ship[ship_id]' || (towed_by = '$user_ship[ship_id]' && location = '$user[location]' && (cargo_bays - metal-fuel-elect-organ-colon) > $temp056))");
 				if($user_ship['shipclass'] == 301 && $temp056 + $user_ship['empty_bays'] <= $user_ship['cargo_bays']){
 					$user_ship['fuel'] += $temp056;
 					$user_ship['empty_bays'] -= $temp056;
@@ -404,7 +404,7 @@ if(isset($toloc)) {
 
 				#ramscooping using the asteroid processor.
 				$temp056 = mt_rand(1,3);
-				dbn("update ${db_name}_ships set metal = metal + '$temp056' where shipclass = 302 && (ship_id = '$user_ship[ship_id]' || (towed_by = '$user_ship[ship_id]' && location = '$user[location]' && (cargo_bays - metal-fuel-elect-organ-colon) > $temp056))");
+				dbn("update {$db_name}_ships set metal = metal + '$temp056' where shipclass = 302 && (ship_id = '$user_ship[ship_id]' || (towed_by = '$user_ship[ship_id]' && location = '$user[location]' && (cargo_bays - metal-fuel-elect-organ-colon) > $temp056))");
 				if($user_ship['shipclass'] == 302 && $temp056 + $user_ship['empty_bays'] <= $user_ship['cargo_bays']){
 					$user_ship['metal'] += $temp056;
 					$user_ship['empty_bays'] -= $temp056;
@@ -412,8 +412,8 @@ if(isset($toloc)) {
 			}
 
 			if ($user['ship_id'] !== NULL) {
-				dbn("update ${db_name}_ships set location = $toloc, mine_mode = 0 where ship_id = '$user[ship_id]'");
-				dbn("update ${db_name}_ships set location = $toloc, mine_mode = 0 where towed_by = '$user_ship[ship_id]' && location = '$user[location]'");
+				dbn("update {$db_name}_ships set location = $toloc, mine_mode = 0 where ship_id = '$user[ship_id]'");
+				dbn("update {$db_name}_ships set location = $toloc, mine_mode = 0 where towed_by = '$user_ship[ship_id]' && location = '$user[location]'");
 				$user_ship['mine_mode'] = 0;
 				$user_ship['location'] = $toloc;
 			}
@@ -490,9 +490,9 @@ if ($user['login_id'] != ADMIN_ID) {
 		}
 
 		if($flag_planet_attack){
-			if(ereg("sv",$user_ship['config'])) {
+			if(str_contains($user_ship['config'],"sv")) {
 				$error_str .= "<a href=attack.php?quark=1&planet_num=$planet2[planet_id]>Fire Quark Displacer</a>, ";
-			} elseif(ereg("sw",$user_ship['config']) && $enable_superweapons == 1) {
+			} elseif(str_contains($user_ship['config'],"sw") && $enable_superweapons == 1) {
 				$error_str .= "<a href=attack.php?terra=1&planet_num=$planet2[planet_id]>Fire Terra Maelstrom</a>, ";
 			}
 			$error_str .= "<a href=planet.php?planet_id=$planet2[planet_id]&attack_planet=1>Attack</a> or Run Away: ";
@@ -539,9 +539,9 @@ if ($user['login_id'] != ADMIN_ID) {
 #Normal system:
 if(isset($mine)) {
 	$tempx9x = 1;
-	db("select fighter_set,login_id,clan_id from ${db_name}_planets where location = '$user[location]'");
+	db("select fighter_set,login_id,clan_id from {$db_name}_planets where location = '$user[location]'");
 	while ($planets = dbr()) {
-		if ($planets['fighter_set'] && ($user['login_id'] == $planets['login_id'] || ($user['clan_id'] == $planets['clan_id'] && $user['clan_id'] > 0)) || ereg("ps",$user_ship['config'])) {
+		if ($planets['fighter_set'] && ($user['login_id'] == $planets['login_id'] || ($user['clan_id'] == $planets['clan_id'] && $user['clan_id'] > 0)) || str_contains($user_ship['config'],"ps")) {
 			$tempx9x = 1;
 		} elseif (!$planets['fighter_set']) {
 			$tempx9x = 1;
@@ -563,7 +563,7 @@ if(isset($mine)) {
 			$error_str .= "This ship has no mining ability.";
 			$user_ship[mine_mode] = 0;
 			} else {
-			dbn("update ${db_name}_ships set mine_mode = '$mine' where ship_id = '$user[ship_id]'");
+			dbn("update {$db_name}_ships set mine_mode = '$mine' where ship_id = '$user[ship_id]'");
 			$user_ship[mine_mode] = $mine;
 			$error_str .= "Ship Mining";
 			}
@@ -572,7 +572,7 @@ if(isset($mine)) {
 
 if(isset($mine_all)) {
 	$tempx9x = 1;
-	db("select fighter_set,login_id,clan_id from ${db_name}_planets where location = '$user[location]'");
+	db("select fighter_set,login_id,clan_id from {$db_name}_planets where location = '$user[location]'");
 	while ($planets = dbr()) {
 		if ($planets['fighter_set'] && ($user['login_id'] == $planets['login_id'] || ($user['clan_id'] == $planets['clan_id'] && $user['clan_id'] > 0))) {
 			$tempx9x = 1;
@@ -588,12 +588,12 @@ if(isset($mine_all)) {
 	} else {
 		if($alternate_play_1 == 1){ #alternate mining
 			if($mine_all == 1){#metal
-				dbn("update ${db_name}_ships set mine_mode = '$mine_all' where mine_rate_metal > 0 && (ship_id = $user[ship_id] || (login_id = '$user[login_id]' && location = '$user[location]'))");
+				dbn("update {$db_name}_ships set mine_mode = '$mine_all' where mine_rate_metal > 0 && (ship_id = $user[ship_id] || (login_id = '$user[login_id]' && location = '$user[location]'))");
 			} else {#fuel
-				dbn("update ${db_name}_ships set mine_mode = '$mine_all' where mine_rate_fuel > 0 && (ship_id = $user[ship_id] || (login_name = '$user[login_name]' && location = '$user[location]'))");
+				dbn("update {$db_name}_ships set mine_mode = '$mine_all' where mine_rate_fuel > 0 && (ship_id = $user[ship_id] || (login_name = '$user[login_name]' && location = '$user[location]'))");
 			}
 		} else { #normal mining
-			dbn("update ${db_name}_ships set mine_mode = '$mine_all' where (mine_rate_metal > 0 || mine_rate_fuel > 0) && (ship_id = $user[ship_id] || (login_id = '$user[login_id]' && location = '$user[location]'))");
+			dbn("update {$db_name}_ships set mine_mode = '$mine_all' where (mine_rate_metal > 0 || mine_rate_fuel > 0) && (ship_id = $user[ship_id] || (login_id = '$user[login_id]' && location = '$user[location]'))");
 		}
 		#mass mining
 		if((($user_ship[mine_rate_metal] > 0 || $user_ship[mine_rate_fuel] > 0) && $mine_all && $alternate_play_1==0) || ($user_ship[mine_rate_metal] > 0 && $mine_all == 1 && $alternate_play_1==1) ||($user_ship[mine_rate_fuel] > 0 && $mine_all == 2 && $alternate_play_1==1)){
@@ -607,13 +607,13 @@ if(isset($mine_all)) {
 }
 
 if(isset($tow)) {
-	db("select location,login_id,towed_by from ${db_name}_ships where ship_id = '$tow'");
+	db("select location,login_id,towed_by from {$db_name}_ships where ship_id = '$tow'");
 	$towed = dbr();
 	if(($towed[location] == $user_ship[location]) && ($towed[login_id] == $user_ship[login_id])) {
 		if($towed[towed_by] == $user_ship[ship_id]) {
-			dbn("update ${db_name}_ships set towed_by = 0 where ship_id = '$tow' && login_id = '$user[login_id]' && location = '$user[location]'");
+			dbn("update {$db_name}_ships set towed_by = 0 where ship_id = '$tow' && login_id = '$user[login_id]' && location = '$user[location]'");
 		} else {
-			dbn("update ${db_name}_ships set towed_by = $user_ship[ship_id] where ship_id = '$tow' && login_id = '$user[login_id]' && location = '$user[location]'");
+			dbn("update {$db_name}_ships set towed_by = $user_ship[ship_id] where ship_id = '$tow' && login_id = '$user[login_id]' && location = '$user[location]'");
 		}
 	} else {
 		$error_str .= "Couldn't Tow Ship.<p>";
@@ -622,11 +622,11 @@ if(isset($tow)) {
 
 if(isset($tow_group) && isset($class)) {
 	if($tow_group == 0) {
-		dbn("update ${db_name}_ships set towed_by = 0 where shipclass = '$class' && login_id = '$user[login_id]' && location = '$user[location]'");
+		dbn("update {$db_name}_ships set towed_by = 0 where shipclass = '$class' && login_id = '$user[login_id]' && location = '$user[location]'");
 	} else {
-		dbn("update ${db_name}_ships set towed_by = '$user_ship[ship_id]' where shipclass = '$class' && login_id = '$user[login_id]' && location = '$user[location]'");
+		dbn("update {$db_name}_ships set towed_by = '$user_ship[ship_id]' where shipclass = '$class' && login_id = '$user[login_id]' && location = '$user[location]'");
 	}
-	$error_str .= mysql_affected_rows()." Ships' Tow Orders Updated.<p>";
+	$error_str .= mysqli_affected_rows($GLOBALS['database_link'])." Ships' Tow Orders Updated.<p>";
 }
 
 
@@ -654,7 +654,7 @@ if(isset($jettison)) {
 			}
 			post_news($news_text_extra);
 		}
-		dbn("update ${db_name}_ships set metal=0, fuel=0, elect=0, organ=0, colon=0 where ship_id = $user_ship[ship_id]");
+		dbn("update {$db_name}_ships set metal=0, fuel=0, elect=0, organ=0, colon=0 where ship_id = $user_ship[ship_id]");
 		$user_ship['metal'] = 0;
 		$user_ship['fuel'] = 0;
 		$user_ship['elect'] = 0;
@@ -667,15 +667,15 @@ if(isset($jettison)) {
 
 #ships has been told to defend the fleet
 if(isset($defender)){
-	dbn("update ${db_name}_ships set defend_fleet = 1 where ship_id = '$defender' && (config REGEXP 'oo' || config REGEXP 'bs') && login_id = '$user[login_id]' && location = '$user[location]'");
-	if(mysql_affected_rows() == 1){
+	dbn("update {$db_name}_ships set defend_fleet = 1 where ship_id = '$defender' && (config REGEXP 'oo' || config REGEXP 'bs') && login_id = '$user[login_id]' && location = '$user[location]'");
+	if(mysqli_affected_rows($GLOBALS['database_link']) == 1){
 		$user_loc_message .= "<p>Ship is now defending the fleet.</p>";
 	} else {
 		$user_loc_message .= "<p>Unable to comply.</p>";
 	}
 } elseif(isset($defender_t)) {
-	dbn("update ${db_name}_ships set defend_fleet = 0 where ship_id = '$defender_t' && login_id = '$user[login_id]' && location = '$user[location]'");
-	if(mysql_affected_rows() == 1){
+	dbn("update {$db_name}_ships set defend_fleet = 0 where ship_id = '$defender_t' && login_id = '$user[login_id]' && location = '$user[location]'");
+	if(mysqli_affected_rows($GLOBALS['database_link']) == 1){
 		$user_loc_message .= "<p>Ship has now resumed normal activities.</p>";
 	} else {
 		$user_loc_message .= "<p>Unable to comply.</p>";
@@ -845,7 +845,7 @@ if($user_options['system_disp_method'] == 2){
 $error_str .= "<p>";
 
 // ports
-db("select port_id,metal_bonus from ${db_name}_ports where location = '$user[location]'");
+db("select port_id,metal_bonus from {$db_name}_ports where location = '$user[location]'");
 while($port = dbr()) {
 	$error_str .= "Starport - <a href=port.php?port_id=$port[port_id]>Dock</a><br>";
 }
@@ -857,7 +857,7 @@ if($flag_research == 1){
 	$bm_t[2] = "bm_upgrades.php";
 	$bm_t[3] = "bm_bombs.php";
 
-	db("select bmrkt_id,bm_name,bmrkt_type from ${db_name}_bmrkt where location = '$user[location]'");
+	db("select bmrkt_id,bm_name,bmrkt_type from {$db_name}_bmrkt where location = '$user[location]'");
 	$bmrkt = dbr();
 	if($bmrkt){
 		$error_str .= "<br>";
@@ -877,7 +877,7 @@ if($user['location'] == 1){ //system 1. Only earth
 
 } else {
 
-	db("select * from ${db_name}_planets where location = '$user[location]' order by planet_name asc, fighters desc");
+	db("select * from {$db_name}_planets where location = '$user[location]' order by planet_name asc, fighters desc");
 	$planets = dbr(1);
 
 	$temp_str = "";
@@ -898,9 +898,9 @@ if($user['location'] == 1){ //system 1. Only earth
 			} else {
 				if($flag_planet_attack != 0){
 					$temp_str .= "- <a href=planet.php?planet_id=$planets[planet_id]&attack_planet=1>Attack</a>";
-					if(ereg("sv",$user_ship['config'])) { //quark disrupter
+					if(str_contains($user_ship['config'],"sv")) { //quark disrupter
 						$temp_str .= " - <a href=attack.php?quark=1&planet_num=$planets[planet_id]>Fire Quark Displacer</a>";
-					} elseif(ereg("sw",$user_ship['config']) && $enable_superweapons == 1) { //terra maelstrom
+					} elseif(str_contains($user_ship['config'],"sw") && $enable_superweapons == 1) { //terra maelstrom
 						$temp_str .= " - <a href=attack.php?terra=1&planet_num=$planets[planet_id]>Fire Terra Maelstrom</a>";
 					}
 					if($planets['pass'] != '0') {
@@ -937,7 +937,7 @@ $temp_str = "";
 
 $error_str .= "<p>";
 
-db("select count(ship_id) from ${db_name}_ships where login_id = '$user[login_id]' && location='$user[location]'");
+db("select count(ship_id) from {$db_name}_ships where login_id = '$user[login_id]' && location='$user[location]'");
 $count=dbr();
 $error_str .= "You have $count[0] ship(s) in this system.<p>";
 
@@ -957,16 +957,16 @@ settype($show_user_ships, "integer");
 /* HANDLE USER SHIPS */
 if ($show_user_ships == 1) {
 	$user['show_user_ships'] = 1;
-	dbn("update ${db_name}_users set show_user_ships = 1 where login_id = '$user[login_id]'");
+	dbn("update {$db_name}_users set show_user_ships = 1 where login_id = '$user[login_id]'");
 } elseif ($show_user_ships == 2) {
 	$user['show_user_ships'] = 0;
-	dbn("update ${db_name}_users set show_user_ships = 0 where login_id = '$user[login_id]'");
+	dbn("update {$db_name}_users set show_user_ships = 0 where login_id = '$user[login_id]'");
 }
 
 
 /* SHOW FULL LIST OF USER SHIPS */
 if($user['show_user_ships'] == 1) {
-	db2("select ship_id,ship_name,class_name,class_name_abbr,config,fighters,towed_by,config,defend_fleet from ${db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && ship_id != '$user[ship_id]' && ship_id > 1 order by fighters desc,ship_name asc");
+	db2("select ship_id,ship_name,class_name,class_name_abbr,config,fighters,towed_by,config,defend_fleet from {$db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && ship_id != '$user[ship_id]' && ship_id > 1 order by fighters desc,ship_name asc");
 	$ships = dbr2(1);
 		if($ships == "") {
 		$error_str .= "<I>You're presently in command of your only ship in this system.</I><P>";
@@ -979,7 +979,7 @@ if($user['show_user_ships'] == 1) {
 			$cloak_str_end = "";
 			$ships['ship_name'] = stripslashes($ships['ship_name']);
 			#ship is cloaked.
-			if(ereg("ls",$ships['config']) || ereg("hs",$ships['config'])){
+			if(str_contains($ships['config'],"ls") || str_contains($ships['config'],"hs")){
 				$cloak_str_start = "<b class=cloak>";
 				$cloak_str_end = "</b>";
 			}
@@ -1012,7 +1012,7 @@ if($user['show_user_ships'] == 1) {
 			#show checkbox (for Moris tow method)
 			if($count[0] > 1 && $user_options['tow_method'] == 2){
 				$error_str .= " - <a href=location.php?command=$ships[ship_id]>Command</a>";
-				if(($ships['defend_fleet'] == 0) && (eregi("bs",$ships['config']) || eregi("oo",$ships['config']))) {
+				if(($ships['defend_fleet'] == 0) && (str_contains($ships['config'],"bs") || str_contains($ships['config'],"oo"))) {
 					$error_str .= " - <a href=location.php?defender=$ships[ship_id]>Passive</a>";
 				} elseif($ships['defend_fleet'] == 1) {
 					$error_str .= " - <a href=location.php?defender_t=$ships[ship_id]>Defending</a>";
@@ -1020,7 +1020,7 @@ if($user['show_user_ships'] == 1) {
 				$error_str .= " - <input type=checkbox name=do_ship[$ships[ship_id]] value=$ships[ship_id]><br>";
 			} else {
 				$error_str .= " - <a href=location.php?command=$ships[ship_id]>Command</a>";
-				if(($ships['defend_fleet'] == 0) && (eregi("bs",$ships['config']) || eregi("oo",$ships['config']))) {
+				if(($ships['defend_fleet'] == 0) && (str_contains($ships['config'],"bs") || str_contains($ships['config'],"oo"))) {
 					$error_str .= " - <a href=location.php?defender=$ships[ship_id]>Passive</a><br>";
 				} elseif($ships['defend_fleet'] == 1) {
 					$error_str .= " - <a href=location.php?defender_t=$ships[ship_id]>Defending</a><br>";
@@ -1051,7 +1051,7 @@ unset($ships);
 
 /* SHOW SUMMARY OF USER SHIPS */
 } else {
-	db2("select count(ship_id) as total, sum(fighters) as fighters, avg(towed_by) as group_tow,class_name, config,shipclass from ${db_name}_ships where location = $user[location] && ship_id > 1 && login_id = $user[login_id] && ship_id != '$user[ship_id]' group by class_name order by total desc, fighters desc");
+	db2("select count(ship_id) as total, sum(fighters) as fighters, avg(towed_by) as group_tow,class_name, config,shipclass from {$db_name}_ships where location = $user[location] && ship_id > 1 && login_id = $user[login_id] && ship_id != '$user[ship_id]' group by class_name order by total desc, fighters desc");
 	$ships = dbr2(1);
 	if(!$ships){
 		$error_str .= "<p>You are commanding the only ship you have in this system.</p>";
@@ -1094,15 +1094,15 @@ settype($show_enemy_ships, "integer");
 /* HANDLE Enemy SHIPS */
 if ($show_enemy_ships == 1) {
 	$user['show_enemy_ships'] = 1;
-	dbn("update ${db_name}_users set show_enemy_ships = 1 where login_id = '$user[login_id]'");
+	dbn("update {$db_name}_users set show_enemy_ships = 1 where login_id = '$user[login_id]'");
 } elseif ($show_enemy_ships == 2) {
 	$user['show_enemy_ships'] = 0;
-	dbn("update ${db_name}_users set show_enemy_ships = 0 where login_id = '$user[login_id]'");
+	dbn("update {$db_name}_users set show_enemy_ships = 0 where login_id = '$user[login_id]'");
 }
 
 /* SHOW FULL LIST OF ENEMY SHIPS */
 if ($user['show_enemy_ships'] == 1) {
-	db2("select s.ship_id, s.ship_name, s.login_id, s.fighters, s.class_name,s.class_name_abbr, s.size, u.login_name, u.clan_id, u.clan_sym, u.clan_sym_color, u.turns_run from ${db_name}_ships s, ${db_name}_users u where s.location = '$user[location]' and s.ship_id > 1 and s.login_id = u.login_id && s.login_id != '$user[login_id]' order by s.fighters desc,s.login_name,s.ship_name");
+	db2("select s.ship_id, s.ship_name, s.login_id, s.fighters, s.class_name,s.class_name_abbr, s.size, u.login_name, u.clan_id, u.clan_sym, u.clan_sym_color, u.turns_run from {$db_name}_ships s, {$db_name}_users u where s.location = '$user[location]' and s.ship_id > 1 and s.login_id = u.login_id && s.login_id != '$user[login_id]' order by s.fighters desc,s.login_name,s.ship_name");
 	$ships = dbr2(1);
 
 	$can_attack = 1;
@@ -1123,11 +1123,11 @@ if ($user['show_enemy_ships'] == 1) {
 			$cloak_str_end = "";
 
 			#player is able to see only non-cloaked ships, unless conditions are met.
-			if((!ereg("ls",$ships['config']) && !ereg("hs",$ships['config'])) || ($ships['clan_id'] == $user['clan_id'] && $user['clan_id'] > 0) || (ereg("ls",$ships['config']) && ereg("sc",$user_ship['config'])) || $user['login_id'] == ADMIN_ID){
+			if((!str_contains($ships['config'],"ls") && !str_contains($ships['config'],"hs")) || ($ships['clan_id'] == $user['clan_id'] && $user['clan_id'] > 0) || (str_contains($ships['config'],"ls") && str_contains($user_ship['config'],"sc")) || $user['login_id'] == ADMIN_ID){
 				$error_str .= print_name($ships);
 
 				#sets some cloak text into a string, if a ship is cloaked.
-				if(ereg("ls",$ships['config']) || ereg("hs",$ships['config'])){
+				if(str_contains($ships['config'],"ls") || str_contains($ships['config'],"hs")){
 					$cloak_str_start = "<b class=cloak>";
 					$cloak_str_end = "</b>";
 				}
@@ -1139,15 +1139,15 @@ if ($user['show_enemy_ships'] == 1) {
 				} else {
 					$error_str .= "$cloak_str_start	$ships[ship_name] ($ships[class_name] w/ <b>$ships[fighters]</b> fighters)".$cloak_str_end;
 				}
-			} elseif(ereg("hs",$ships['config']) && !ereg("sc",$user_ship['config'])) { #hs without scanner
+			} elseif(str_contains($ships['config'],"hs") && !str_contains($user_ship['config'],"sc")) { #hs without scanner
 				$error_str .= "<b class=cloak>::::: ".discern_size($ships['size'])." Disturbance Detected:::::</b>";
-			} elseif(ereg("hs",$ships['config']) && ereg("sc",$user_ship['config'])) { # hs, with scanner.
+			} elseif(str_contains($ships['config'],"hs") && str_contains($user_ship['config'],"sc")) { # hs, with scanner.
 				$error_str .= "<b>Unknown Owner</b><b class=cloak> $ships[ship_name] ($ships[class_name] w/ <b>$ships[fighters]</b> fighters)</b>";
-			} elseif(ereg("ls",$ships['config']) && !ereg("sc",$user_ship['config'])) { # ls, no scanner.
+			} elseif(str_contains($ships['config'],"ls") && !str_contains($user_ship['config'],"sc")) { # ls, no scanner.
 				$error_str .= "<b class=cloak>:::::Cloaked $ships[class_name] Detected:::::</b>";
 			}
 
-			if ($user['login_id'] != ADMIN_ID && (($user['clan_id'] == $ships['clan_id'] && $user['clan_id'] > 0) || ($can_attack == 0 || $ships['turns_run'] < $turns_safe) || ((ereg("ls",$ships['config']) || ereg("hs",$ships['config'])) && !ereg("sc", $user_ship['config'])) || $ships['login_id'] == ADMIN_ID)) {
+			if ($user['login_id'] != ADMIN_ID && (($user['clan_id'] == $ships['clan_id'] && $user['clan_id'] > 0) || ($can_attack == 0 || $ships['turns_run'] < $turns_safe) || ((str_contains($ships['config'],"ls") || str_contains($ships['config'],"hs")) && !str_contains($user_ship['config'],"sc")) || $ships['login_id'] == ADMIN_ID)) {
 				$error_str .= "<br>";
 			} else {
 				$error_str .= " - <a href=attack.php?target=$ships[ship_id]>Attack</a><br>";
@@ -1163,7 +1163,7 @@ if ($user['show_enemy_ships'] == 1) {
 
 /* SHOW SUMMARY OF ENEMY SHIPS	*/
 } else {
-	db2("select count(s.ship_id) as total, sum(s.fighters) as fighters, s.login_id, s.login_name, u.clan_id, u.clan_sym, u.clan_sym_color, u.turns_run from ${db_name}_ships s  LEFT JOIN  ${db_name}_users u ON u.login_id = s.login_id WHERE `s`.`location` = '$user[location]' && `s`.`ship_id` > 1 && `s`.`login_id` != '$user[login_id]' group by login_id order by total,s.login_name");
+	db2("select count(s.ship_id) as total, sum(s.fighters) as fighters, s.login_id, s.login_name, u.clan_id, u.clan_sym, u.clan_sym_color, u.turns_run from {$db_name}_ships s  LEFT JOIN  {$db_name}_users u ON u.login_id = s.login_id WHERE `s`.`location` = '$user[location]' && `s`.`ship_id` > 1 && `s`.`login_id` != '$user[login_id]' group by login_id order by total,s.login_name");
 	$ships = dbr2();
 	if(!$ships){
 		$error_str .= "<p>There are no other ships in this system.</p>\n";
@@ -1180,23 +1180,23 @@ if ($user['show_enemy_ships'] == 1) {
 
 			!isset($ships['config']) ? $ships['config'] = "" : 1;
 			#show un-cloaked ships
-			if(!ereg("ls",$ships['config']) && !ereg("hs",$ships['config'])){
+			if(!str_contains($ships['config'],"ls") && !str_contains($ships['config'],"hs")){
 				$error_str .= print_name($ships);
 				$error_str .= " has <b>$ships[total]</b> Ship(s) w/ <b>$ships[fighters]</b> Fighters";
 
 				#show attack link next to group of ships.
-				if(($user['clan_id'] == $ships['clan_id'] && $user['clan_id'] > 0) || ($can_attack == 0 || $ships['turns_run'] < $turns_safe) || ((ereg("ls",$ships['config']) || ereg("hs",$ships['config'])) && !ereg("sc",$user_ship['config']))){
+				if(($user['clan_id'] == $ships['clan_id'] && $user['clan_id'] > 0) || ($can_attack == 0 || $ships['turns_run'] < $turns_safe) || ((str_contains($ships['config'],"ls") || str_contains($ships['config'],"hs")) && !str_contains($user_ship['config'],"sc"))){
 					$error_str .= "<br>";
 				} else {
-					db("select ship_id from ${db_name}_ships where login_id = '$ships[login_id]' && location='$user[location]' limit 1");
+					db("select ship_id from {$db_name}_ships where login_id = '$ships[login_id]' && location='$user[location]' limit 1");
 					$to_attack = dbr(1);
 					$error_str .= " - <a href=attack.php?target=$to_attack[ship_id]>Attack</a><br>";
 				}
 
 			#show cloaked ships if certain conditions are met.
-			} elseif((ereg("ls",$ships['config']) && ereg("sc",$user_ship['config'])) || ($ships['clan_id'] == $user['clan_id'] && $user['clan_id'] > 0) || $user['login_id'] == ADMIN_ID){
+			} elseif((str_contains($ships['config'],"ls") && str_contains($user_ship['config'],"sc")) || ($ships['clan_id'] == $user['clan_id'] && $user['clan_id'] > 0) || $user['login_id'] == ADMIN_ID){
 				$error_str .= print_name($ships);
-				if(ereg("ls",$ships['config'])){
+				if(str_contains($ships['config'],"ls")){
 					$error_str .= "<b class=cloak> has <b>$ships[total]</b> Cloaked Ship(s) w/ <b>$ships[fighters]</b> Fighters</b>";
 				} else {
 					$error_str .= "<b class=cloak> has <b>$ships[total]</b> Highly Cloaked Ship(s) w/ <b>$ships[fighters]</b> Fighters</b>";
@@ -1206,7 +1206,7 @@ if ($user['show_enemy_ships'] == 1) {
 				if(($user['clan_id'] == $ships['clan_id'] && $user['clan_id'] > 0) || ($can_attack == 0 || $ships['turns_run'] < $turns_safe)){
 					$error_str .= "<br>";
 				} else {
-					db("select ship_id from ${db_name}_ships where login_id = '$ships[login_id]' && location='$user[location]' && config REGEXP 'ls' limit 1");
+					db("select ship_id from {$db_name}_ships where login_id = '$ships[login_id]' && location='$user[location]' && config REGEXP 'ls' limit 1");
 					$to_attack = dbr(1);
 					$error_str .= " - <a href=attack.php?target=$to_attack[ship_id]>Attack</a><br>";
 				}
@@ -1214,9 +1214,9 @@ if ($user['show_enemy_ships'] == 1) {
 			#give only brief details about cloaked ships if none of the requisite conditions are met.
 			} else {
 				$cloaked_ships += $ships['total'];
-				if(ereg("sc",$user_ship['config']) && ereg("hs",$ships['config'])){
+				if(str_contains($user_ship['config'],"sc") && str_contains($ships['config'],"hs")){
 					$cloaked_figs += $ships['fighters'];
-					db("select ship_id from ${db_name}_ships where login_id = '$ships[login_id]' && location='$user[location]' && config REGEXP 'hs' limit 1");
+					db("select ship_id from {$db_name}_ships where login_id = '$ships[login_id]' && location='$user[location]' && config REGEXP 'hs' limit 1");
 					$to_attack = dbr(1);
 					$cloaked_attack_link = " - <a href=attack.php?target=$to_attack[ship_id]>Attack</a>";
 				}

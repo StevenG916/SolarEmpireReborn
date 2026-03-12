@@ -20,7 +20,7 @@ if ($news) {
 	echo make_table(array("",""));
 	echo "Last <b>$user_options[news_back]</b> news posts relating to random events:<br>";
 
-	db("select headline,timestamp from ${db_name}_news where login_id = -10 || login_id = -11 || login_id = 2 || login_id = 3 order by timestamp desc LIMIT $user_options[news_back]");
+	db("select headline,timestamp from {$db_name}_news where login_id = -10 || login_id = -11 || login_id = 2 || login_id = 3 order by timestamp desc LIMIT $user_options[news_back]");
 	while($news = dbr()) {
 		echo quick_row("<b>".date("M d - H:i",$news[timestamp]),$news[headline]);
 	}
@@ -30,12 +30,12 @@ if ($news) {
 }
 
 if($list){
-	db("select count(star_id) from ${db_name}_stars where event_random != '0'");
+	db("select count(star_id) from {$db_name}_stars where event_random != '0'");
 	$events = dbr();
  	if($events[0]){
 		echo "<p>There are a total of <b>$events[0]</b> systems with random events in them.";
 		echo "<br>These include:<br>";
-		db("select count(event_random),event_random from ${db_name}_stars where event_random > 0 GROUP by event_random");
+		db("select count(event_random),event_random from {$db_name}_stars where event_random > 0 GROUP by event_random");
 		while($ran_ev = dbr()){
 			if($ran_ev[event_random] == 4){
 				#Mining Rushes
@@ -73,9 +73,9 @@ if($list){
 	#WormHoles
 	$owayworm = 0;
 	$twayworm = 0;
-	db("select star_id,wormhole from ${db_name}_stars where wormhole > '0'");
+	db("select star_id,wormhole from {$db_name}_stars where wormhole > '0'");
 	while($events = dbr()) {
-		db2("select star_id,wormhole from ${db_name}_stars where star_id = '$events[wormhole]' && wormhole = $events[star_id]");
+		db2("select star_id,wormhole from {$db_name}_stars where star_id = '$events[wormhole]' && wormhole = $events[star_id]");
 		$tway = dbr2();
 		if ($tway[wormhole]) {
 				$twayworm++;

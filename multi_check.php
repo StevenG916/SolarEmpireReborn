@@ -15,16 +15,16 @@ find players with the same IP address.</p>
 
 END;
 
-$ipList = mysql_query("SELECT DISTINCT `last_ip` FROM `{$db_name}_users` ORDER BY `last_ip`");
-while(list($ip) = mysql_fetch_row($ipList)) {
-	$associated = mysql_query("SELECT `login_id` FROM `{$db_name}_users` WHERE `last_ip`='$ip' ORDER BY `login_name`");
-	if (mysql_num_rows($associated) <= 1) {
-		continue;
-	}
-
+db("SELECT DISTINCT `last_ip` FROM `{$db_name}_users` ORDER BY `last_ip`");
+while($ipRow = dbr(0)) {
+	$ip = $ipRow[0];
+	db2("SELECT `login_id` FROM `{$db_name}_users` WHERE `last_ip`='$ip' ORDER BY `login_name`");
 	$badGuy = array();
-	while (list($id) = mysql_fetch_row($associated)) {
-		$badGuy[] = array('login_id' => $id);
+	while ($idRow = dbr2(0)) {
+		$badGuy[] = array('login_id' => $idRow[0]);
+	}
+	if (count($badGuy) <= 1) {
+		continue;
 	}
 
 	$host = gethostbyaddr($ip);

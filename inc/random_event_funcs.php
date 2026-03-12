@@ -61,12 +61,12 @@ function random_event_checker($star,$user,$autowarp) {
 
 		//player runs into nebula
 		} elseif ($star['event_random'] == 2) {
-			dbn("update ${db_name}_ships set shields = 0 where login_id = $user[login_id] && location = $user[location] && $user[login_id] != 1");	
+			dbn("update {$db_name}_ships set shields = 0 where login_id = $user[login_id] && location = $user[location] && $user[login_id] != 1");	
 			$user_ship['shields'] = 0;
 
 		#Solar Storm
 		} elseif ($star['event_random'] == 12) {
-			dbn("update ${db_name}_ships set shields = 0 where login_id = '$user[login_id]' && location = '$user[location]' && '$user[login_id]' != 1");	
+			dbn("update {$db_name}_ships set shields = 0 where login_id = '$user[login_id]' && location = '$user[location]' && '$user[login_id]' != 1");	
 			$user_ship['shields'] = 0;
 		
 		//end random things
@@ -82,16 +82,16 @@ function black_hole($user,$star) {
 global $db_name,$user_ship;
 
 	$bh_text = "Warning! Warning! System <b>$star[star_id]</b> had a Black Hole in it. <br>You were nearly pulled in, but you managed to escape in the nick of time.<br>However, whilst escaping you were flung to another star system, and took varying degrees of damage to all ships you were towing.";
-	db("select count(star_id) from ${db_name}_stars");
+	db("select count(star_id) from {$db_name}_stars");
 	$total1 = dbr();
 	$total = $total1[0];
 	if($user_ship[ship_id]) {
-		db2("select ship_id,shields,fighters,ship_name from ${db_name}_ships where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]' && login_id = '$user[login_id]'");
+		db2("select ship_id,shields,fighters,ship_name from {$db_name}_ships where towed_by = '$user_ship[ship_id]' and location = '$user_ship[location]' && login_id = '$user[login_id]'");
 		while($tow_ship = dbr2()) {
 
 			$rand_star = random_system_num();
 
-			dbn("update ${db_name}_ships set location = '$rand_star', mine_mode=0 where ship_id = $tow_ship[ship_id]");
+			dbn("update {$db_name}_ships set location = '$rand_star', mine_mode=0 where ship_id = $tow_ship[ship_id]");
 
 			$totaldefs = $tow_ship['shields'] + $tow_ship['fighters'];
 
@@ -104,7 +104,7 @@ global $db_name,$user_ship;
 				}
 				$damtodo -= $shield_damage;
 
-				dbn("update ${db_name}_ships set fighters = fighters - $damtodo, shields = shields - $shield_damage where ship_id = '$tow_ship[ship_id]'");
+				dbn("update {$db_name}_ships set fighters = fighters - $damtodo, shields = shields - $shield_damage where ship_id = '$tow_ship[ship_id]'");
 				$n_text .= "<br>The <b class=b1>$tow_ship[ship_name]</b> took <b>$damtodo2</b> damage and was thrown to system #<b>$rand_star</b>.";
 			}
 		}
@@ -119,7 +119,7 @@ global $db_name,$user_ship;
 			}
 		}
 
-		dbn("update ${db_name}_ships set location = $rand_star, towed_by =0, mine_mode=0 where ship_id = $user_ship[ship_id]");
+		dbn("update {$db_name}_ships set location = $rand_star, towed_by =0, mine_mode=0 where ship_id = $user_ship[ship_id]");
 
 		$totaldefs = $user_ship['shields'] + $user_ship['fighters'];
 
@@ -131,7 +131,7 @@ global $db_name,$user_ship;
 				$shield_damage = $user_ship['shields'];
 			}
 			$damtodo -= $shield_damage;
-			dbn("update ${db_name}_ships set fighters = fighters - $damtodo, shields = shields - $shield_damage where ship_id = '$user_ship[ship_id]'");
+			dbn("update {$db_name}_ships set fighters = fighters - $damtodo, shields = shields - $shield_damage where ship_id = '$user_ship[ship_id]'");
 			$m_text .="<p>The <b class=b1>$user_ship[ship_name]</b> took <b>$damtodo2</b> damage and was thrown to system #<b>$rand_star</b>.";
 			$user_ship['shields'] -= $shield_damage;
 			$user_ship['fighters'] -= $damtodo;
@@ -143,8 +143,8 @@ global $db_name,$user_ship;
 		}
 
 		$tow_ship = $user_ship;
-		dbn("update ${db_name}_users set location = $rand_star where login_id = '$user[login_id]'");
-		dbn("update ${db_name}_ships set location = $rand_star where ship_id = '$user[ship_id]'");
+		dbn("update {$db_name}_users set location = $rand_star where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_ships set location = $rand_star where ship_id = '$user[ship_id]'");
 	}
 
 	post_news("Mayday, Mayday. Am <b class=b1>$user[login_name]</b>. Have found a black hole in syste ...... *crackle* ..... Need help.... *static*");

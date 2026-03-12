@@ -9,7 +9,7 @@ Date: 14/6/02
 require_once('inc/user.inc.php');
 
 
-db("select * from ${db_name}_planets where planet_id = '$planet_id'");
+db("select * from {$db_name}_planets where planet_id = '$planet_id'");
 $planet = dbr();
 
 $shield_gen_cost = 50000;
@@ -38,7 +38,7 @@ if($user['location'] != $planet['location']) {
 		take_cash(100000);
 		charge_turns(10);
 		$out .= "Your new <b class=b1>Omega Missile</b> is ready, and your planet has been debited the materials needed to construct the Missile.";
-		dbn("update ${db_name}_planets set missile = '-1', elect = elect - 50, metal=metal-200,fuel=fuel-100 where planet_id = $planet[planet_id]");
+		dbn("update {$db_name}_planets set missile = '-1', elect = elect - 50, metal=metal-200,fuel=fuel-100 where planet_id = $planet[planet_id]");
 	}
 
 #Fires missile
@@ -57,9 +57,9 @@ if($user['location'] != $planet['location']) {
 		$out .= "You do not have a missile on this planet.";
 	} elseif(!$destination){
 		if($user[clan_id] >0){
-			db("select planet_name,planet_id from ${db_name}_planets where clan_id != '$user[clan_id]' && login_id != 1 && planet_id != $planet_id && location != $planet[location] && login_id != $user[login_id]");
+			db("select planet_name,planet_id from {$db_name}_planets where clan_id != '$user[clan_id]' && login_id != 1 && planet_id != $planet_id && location != $planet[location] && login_id != $user[login_id]");
 		} else {
-			db("select planet_name,planet_id from ${db_name}_planets where login_id != 1 && planet_id != $planet_id && location != $planet[location] && login_id != $user[login_id]");
+			db("select planet_name,planet_id from {$db_name}_planets where login_id != 1 && planet_id != $planet_id && location != $planet[location] && login_id != $user[login_id]");
 		}
 		$enemy_planets=dbr();
 		if(!$enemy_planets){
@@ -78,7 +78,7 @@ if($user['location'] != $planet['location']) {
 		$out .= "<p><INPUT type=submit value=Launch></form><p>";
 		}
 	} else {
-		db("select * from ${db_name}_planets where planet_id = '$destination'");
+		db("select * from {$db_name}_planets where planet_id = '$destination'");
 		$target_planet = dbr();
 		$turns = get_star_dist($user[location],$target_planet[location]);
 		if($turns < 12) {
@@ -100,7 +100,7 @@ if($user['location'] != $planet['location']) {
 			get_var('Launch Confirmation','add_planetary.php',"Please <b>Confirm</b> that you want to fire your <b class=b1>Omega Missile</b> at the planet <b class=b1>$target_planet[planet_name].<p>This destination will require <b>$turns</b> Turns, and <b>$fuel</b> Fuel to prep for Launch?",'sure','');
 		} else {
 			charge_turns($turns);
-			dbn("update ${db_name}_planets set missile=0, fuel=fuel-'$fuel' where planet_id = '$planet_id'");
+			dbn("update {$db_name}_planets set missile=0, fuel=fuel-'$fuel' where planet_id = '$planet_id'");
 			$out .= "Counting Down to Launch:<p>T Minus: 5... 4... 3... 2... 1...	<b class=b1>Liftoff</b>.";
 			$out .= "<p>The <b class=b1>Omega Missile</b> has been successfully launched, with the target <b class=b1>$target_planet[planet_name]</b> as its destination.";
 			$out .= "<br><br><br><br>Missile has struck the planet <b class=b1>$target_planet[planet_name]</b>. Damage report follows:";
@@ -167,13 +167,13 @@ if($user['location'] != $planet['location']) {
 				}
 
 				$out .= "<p>Damage report ends;";
-				dbn("update ${db_name}_planets set fighters = fighters - '$damage_done', colon=colon-'$colon_killed', alloc_fight=alloc_fight-'$fight_killed', alloc_elect=alloc_elect-'$elect_killed', alloc_organ=alloc_organ-'$organ_killed' where planet_id = '$destination'");
+				dbn("update {$db_name}_planets set fighters = fighters - '$damage_done', colon=colon-'$colon_killed', alloc_fight=alloc_fight-'$fight_killed', alloc_elect=alloc_elect-'$elect_killed', alloc_organ=alloc_organ-'$organ_killed' where planet_id = '$destination'");
 
 				send_message($target_planet['login_id'],"<b class=b1>$user[login_name]</b> launched an Omega Missile at your planet <b class=b1>$target_planet[planet_name]</b> (system #<b>$target_planet[location]</b>) taking out <b>$damage_done</b> fighters, and <b>$colon_killed</b> colonists.");
 
 			} else {
-				dbn("delete from ${db_name}_planets where planet_id = '$destination'");
-				dbn("update ${db_name}_stars set planetary_slots = planetary_slots + 1 where star_id = $target_planet[location]");
+				dbn("delete from {$db_name}_planets where planet_id = '$destination'");
+				dbn("update {$db_name}_stars set planetary_slots = planetary_slots + 1 where star_id = $target_planet[location]");
 				send_message($target_planet['location'],"Your planet <b class=b1>$target_planet[planet_name]</b> (system #<b>$target_planet[location]</b>) was destroyed by a <b class=b1>Omega Missile</b> launched by <b class=b1>$user[login_name]</b>.");
 			}
 
@@ -207,7 +207,7 @@ END;
 	} else {
 		take_cash(100000);
 		$out .= "Construction of the <b class=b1>Missile Launch Pad</b> is under way.<br>It will be completed in <b>24hrs</b>.<br>Your planet has been debited the materials needed to construct the Pad.";
-		dbn("update ${db_name}_planets set launch_pad = '25', elect = elect - 200, metal=metal-100,fuel=fuel-100 where planet_id = $planet[planet_id]");
+		dbn("update {$db_name}_planets set launch_pad = '25', elect = elect - 200, metal=metal-100,fuel=fuel-100 where planet_id = $planet[planet_id]");
 	}
 
 #build a research facility
@@ -215,7 +215,7 @@ END;
 	$header = "Research Facility";
 
 	#check to see how many research centres the user has.
-	db("select count(planet_id) from ${db_name}_planets where research_fac = 1 && login_id = $user[login_id]");
+	db("select count(planet_id) from {$db_name}_planets where research_fac = 1 && login_id = $user[login_id]");
 	$num_research = dbr();
 	if($user['cash'] < $research_fac_cost) {
 		$out .= "You can not afford a <b class=b1>Research Facility</b>.";
@@ -228,7 +228,7 @@ END;
 	} else {
 		take_cash($research_fac_cost);
 		$out .= "You have purchased and installed a <b class=b1>Research Facility</b> on the planet <b class=b1>$planet[planet_name]</b> at the cost of <b>$research_fac_cost</b> Credits.<p>Note: You are only allowed two research centres at a time, with a maximum of 1 per planet.";
-		dbn("update ${db_name}_planets set research_fac = '1' where planet_id = $planet[planet_id]");
+		dbn("update {$db_name}_planets set research_fac = '1' where planet_id = $planet[planet_id]");
 	}
 
 #build a shield generator
@@ -243,7 +243,7 @@ END;
 	} else {
 		take_cash($shield_gen_cost);
 		$out .= "You have purchased and installed a <b class=b1>Shield Generator</b> on the planet <b class=b1>$planet[planet_name]</b> at the cost of <b>$shield_gen_cost</b> Credits.";
-		dbn("update ${db_name}_planets set shield_gen = '3' where planet_id = $planet[planet_id]");
+		dbn("update {$db_name}_planets set shield_gen = '3' where planet_id = $planet[planet_id]");
 		$planet['shield_gen'] = 3;
 	}
 

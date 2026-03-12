@@ -48,14 +48,14 @@ $rs = "<p><a href=upgrade.php>Return to Accessories & Upgrades Store</a>";
 // checks
 if(isset($buy)) {
 	if($buy ==1) { //Fighter capacity
-		if($user_ship['max_fighters'] + $fighter_inc >= 5000 && !eregi("bs",$user_ship['config'])) {
+		if($user_ship['max_fighters'] + $fighter_inc >= 5000 && !str_contains($user_ship['config'], 'bs')) {
 			$error_str .= "It is against regulations to have more than 4,999 fighter capacity on a ship unless the ship is registered as a battleship.<br>To do that you'll have to purchase a battleship upgrade from Bilkos.<p>";
 		} else {
 			$error_str .= make_basic_upgrade("Fighter","max_fighters",$fighter_inc,$basic_cost);
 		}
 
 	} elseif($buy ==2) { //Shield Capacity
-		if (eregi("sj",$user_ship['config'])){
+		if (str_contains($user_ship['config'], 'sj')){
 			$error_str .= "Ships with Sub-Space Jump drieves are not allowed to have shields on due to technical problems involving the dynamics of warp-point generation.<p>";
 		} else {
 			$error_str .= make_basic_upgrade("Shield","max_shields",$shield_inc,$basic_cost);
@@ -65,7 +65,7 @@ if(isset($buy)) {
 		$error_str .= make_basic_upgrade("Cargo Bay","cargo_bays",$cargo_inc,$basic_cost);
 
 	} elseif($buy==4) { //shrouder
-		if (eregi("ls",$user_ship['config'])){
+		if (str_contains($user_ship['config'], 'ls')){
 			$error_str .= "This ship already has low stealth. It is not possible to upgrade to high-stealth.<p>";
 		} elseif(!isset($sure)) {
 			get_var('Buy Scanner',$filename,"This device will Highly stealth the ship. Enemy players will only see a distortion, and not be able to target it, unless they have a scanner on their ship.<br>If they do have a scanner they will still not be able to see who owns the ship.<p>Are you sure you want to buy a <b class=b1>Shrouding Unit</b>, for the <b class=b1>$user_ship[ship_name]</b>?",'sure','');
@@ -83,7 +83,7 @@ if(isset($buy)) {
 		}
 
 	} elseif($buy==6) { //Transverser upgrade (wormhole stabiliser)
-		if (!eregi("sj",$user_ship['config'])){
+		if (!str_contains($user_ship['config'], 'sj')){
 			$error_str .= "This ship does not have a <b class=b1>SubSpace Jump Drive</b> and so is not capable of using a <b class=b1>Wormhole Stabiliser</b>.<p>";
 		} elseif(!isset($sure)) {
 			get_var('Buy Wormhole Stabiliser',$filename,"This upgrade will allow your ship to take more than 10 ships with it when sub-space jumping.<br>It will also allow you to auto-shift materials and colonists between planets.<p>Are you sure you want to buy a <b class=b1>Wormhole Stabiliser</b>, for the <b class=b1>$user_ship[ship_name]</b>?",'sure','');
@@ -99,7 +99,7 @@ if(isset($buy)) {
 		}
 
 	} elseif($buy ==8) { //transwarp drive
-		if (eregi("sj",$user_ship['config'])){
+		if (str_contains($user_ship['config'], 'sj')){
 			$error_str .= "Your ship has a <b class=b1>SubSpace Jump Drive</b> on, and so can't have a <b class=b1>Transwarp Drive</b>.<p>";
 		} elseif(!isset($sure)) {
 			get_var('Buy Transwarp Drive',$filename,"This upgrade will allow your ship (and any ships following it) to jump a limited distance across the universe. Ideal for peninsula hopping, and getting to star-islands.<p>Are you sure you want to buy a <b class=b1>Transwarp Drive</b>, for the <b class=b1>$user_ship[ship_name]</b>?",'sure','');
@@ -123,7 +123,7 @@ if(isset($buy)) {
 
 			take_cash($pea_turret);
 
-			dbn("update ${db_name}_ships set upgrades = upgrades - 1 ,num_ot = num_ot + 1 where ship_id = '$user[ship_id]'");
+			dbn("update {$db_name}_ships set upgrades = upgrades - 1 ,num_ot = num_ot + 1 where ship_id = '$user[ship_id]'");
 			$user_ship['upgrades'] --;
 			$user_ship['num_ot'] ++;
 		}
@@ -144,7 +144,7 @@ if(isset($buy)) {
 
 			take_cash($defensive_turret);
 
-			dbn("update ${db_name}_ships set upgrades = upgrades - 1,num_dt = num_dt + 1 where ship_id = '$user[ship_id]'");
+			dbn("update {$db_name}_ships set upgrades = upgrades - 1,num_dt = num_dt + 1 where ship_id = '$user[ship_id]'");
 			$user_ship['upgrades'] --;
 			$user_ship['num_dt'] ++;
 		}
@@ -168,11 +168,11 @@ if(isset($b_buy)) {
 		$error_str .= "You do not have enough money for that many upgrade pods.<p>";
 
 	#user not allowed more than 5k figs unless the ship is a battleship.
-	} elseif(($user_ship['max_fighters'] + ($fighter_inc * $num_up) >= 5000) && !ereg("bs",$user_ship['config']) && $b_buy == 1) {
+	} elseif(($user_ship['max_fighters'] + ($fighter_inc * $num_up) >= 5000) && !str_contains($user_ship['config'], 'bs') && $b_buy == 1) {
 		$error_str .= "It is against regulations to have more than 4,999 fighter capacity on a ship unless the ship is registered as a battleship.<br>To do that you'll have to purchase a battleship upgrade from Bilkos.<p>";
 
 	#not allowed shields on a SJ ship.
-	} elseif (ereg("sj",$user_ship['config']) && $b_buy == 2){
+	} elseif (str_contains($user_ship['config'], 'sj') && $b_buy == 2){
 		$error_str .= "It is not possible to fit shield capacity to a ship that has a <b class=b1>SubSpace Jump Drive</b> on.<p>The law's of physics are very uncompromising on this point.";
 
 	#confirmation
@@ -202,7 +202,7 @@ if(isset($b_buy)) {
 
 		$error_str .= "You have increased the <b class=b1>$user_ship[ship_name]'s</b> $up_str capacity by <b>$inc_amount</b> for <b>$cost</b> Credits. <p>";
 		take_cash($cost);
-		dbn("update ${db_name}_ships set $up_sql = $up_sql + '$inc_amount', upgrades = upgrades - '$num_up' where ship_id = '$user_ship[ship_id]'");
+		dbn("update {$db_name}_ships set $up_sql = $up_sql + '$inc_amount', upgrades = upgrades - '$num_up' where ship_id = '$user_ship[ship_id]'");
 		$user_ship['upgrades'] -= $num_up;
 		$user_ship[$up_sql] += $inc_amount;
 		if($up_sql == "cargo_bays"){
@@ -264,7 +264,7 @@ if($user_ship['upgrades'] < 1){
 	$error_str .= "</table><br><br>Propulsion Upgrades";
 	$error_str .= make_table(array("Item Name","Notes","Item Cost"),"75%");
 	$error_str .=  make_row(array("Transwarp Drive","Cannot be fitted to a ship with a Subspace Jump Drive",$transwarp_cost,"<a href=$filename?buy=8>Buy</a>"));
-	if (eregi("sj",$user_ship[config])){
+	if (str_contains($user_ship['config'], 'sj')){
 		$error_str .=  make_row(array("WormHole Stabiliser","Can only be installed on ships with a Subspace Jump Drive.",$stabiliser_upgrade,"<a href=$filename?buy=6>Buy</a>"));
 	}
 
@@ -292,7 +292,7 @@ function make_basic_upgrade ($upgrade_str, $upgrade_sql, $inc_amount, $cost){
 		return "";
 	} else {
 		take_cash($cost);
-		dbn("update ${db_name}_ships set $upgrade_sql = $upgrade_sql + '$inc_amount', upgrades = upgrades - 1 where ship_id = '$user_ship[ship_id]'");
+		dbn("update {$db_name}_ships set $upgrade_sql = $upgrade_sql + '$inc_amount', upgrades = upgrades - 1 where ship_id = '$user_ship[ship_id]'");
 		$user_ship['upgrades'] --;
 		$user_ship[$upgrade_sql] += $inc_amount;
 

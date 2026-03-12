@@ -97,11 +97,11 @@ function planet_functionality()
 {
 	global $UNI,$db_name,$systems;
 	#pre-generated planets
-	dbn("delete from ${db_name}_planets");
+	dbn("delete from {$db_name}_planets");
 	print "Old planets wiped\n<br>";
 
 	//sum total metal & fuel in the universe.
-	db("select sum(metal) as metal, sum(fuel) as fuel from ${db_name}_stars");
+	db("select sum(metal) as metal, sum(fuel) as fuel from {$db_name}_stars");
 	$mineral_sum = dbr(1);
 	$metal_sum = round($mineral_sum['metal'] / ($UNI['numsystems'] - 1));
 	$fuel_sum = round($mineral_sum['fuel'] / ($UNI['numsystems'] - 1));
@@ -118,7 +118,7 @@ function planet_functionality()
 		$planet_img = mt_rand(1, 15);
 		$planetary_figs = ($planetary_metal + $planetary_fuel) * 1.1;
 		$p_id = $ct + 1;
-		dbn("insert into ${db_name}_planets (planet_id, planet_name, location, login_id, login_name, fighters, cash, clan_id, metal, fuel, pass, planet_img) values('$p_id', '$planet_name', $planet_loc, '0', 'None', '$planetary_figs', '1', 0, '$planetary_metal', '$planetary_fuel', '0', '$planet_img')");
+		dbn("insert into {$db_name}_planets (planet_id, planet_name, location, login_id, login_name, fighters, cash, clan_id, metal, fuel, pass, planet_img) values('$p_id', '$planet_name', $planet_loc, '0', 'None', '$planetary_figs', '1', 0, '$planetary_metal', '$planetary_fuel', '0', '$planet_img')");
 		//print "Planet $ct created at $planet_loc\n<br>";
 	}
 	print "Randomly Placed Planets Done.\n<br>";
@@ -138,7 +138,7 @@ function random_event_placer()
 		$to_do = ceil($UNI['numsystems'] / 110);
 		for($i=1; $i <= $to_do; $i++){
 			$place = mt_rand(2, $UNI['numsystems']);
-			dbn("update ${db_name}_stars set event_random = 1, star_name = 'Black Hole', planetary_slots = 0 where star_id = '$place'");
+			dbn("update {$db_name}_stars set event_random = 1, star_name = 'Black Hole', planetary_slots = 0 where star_id = '$place'");
 			$systems[$place - 1]['event_random'] = 1;
 			$systems[$place - 1]['name'] = "Black Hole";
 			$systems[$place - 1]['planetary_slots'] = 0;//no planets in BH systems.
@@ -515,17 +515,17 @@ function get_closest_systems($sys, $systems, $howmany) {
 	asort($dists,SORT_NUMERIC);
 
 	//link to as many of the closest systems as can.
-	while(count($systems_to_link) < $howmany) {
-		if(!$present_sys = each($dists)) {//get a system out of the dist array. RETURN if none.
-			return $systems_to_link;
+	foreach($dists as $present_sys_key => $present_sys_value) {
+		if(count($systems_to_link) >= $howmany) {
+			break;
 		}
 
 		//too far away to be linked to (Sol System excepted).
-		if($present_sys['value'] > $UNI['link_dist'] && $UNI['link_dist'] > 0 && $sys['num'] != 0){
+		if($present_sys_value > $UNI['link_dist'] && $UNI['link_dist'] > 0 && $sys['num'] != 0){
 			return $systems_to_link;
 		}
 
-		$systems_to_link[] = $systems[$present_sys['key']];
+		$systems_to_link[] = $systems[$present_sys_key];
 	}
 	return $systems_to_link;
 }
@@ -593,7 +593,7 @@ function render_global_se1($game_id) {
 
 	//get the star systems from the Db if using pre-genned map.
 	if (isset($gen_new_maps)) {
-		db("select (star_id -1) as num, x_loc, y_loc, wormhole, CONCAT(link_1 -1, ',', link_2 -1, ',', link_3 -1, ',', link_4 -1, ',', link_5 -1, ',', link_6 -1) as links from ${game_id}_stars order by star_id asc");
+		db("select (star_id -1) as num, x_loc, y_loc, wormhole, CONCAT(link_1 -1, ',', link_2 -1, ',', link_3 -1, ',', link_4 -1, ',', link_5 -1, ',', link_6 -1) as links from {$game_id}_stars order by star_id asc");
 		while($systems[] = dbr(1)); //dump all entries into $systems.
 		unset($systems[count($systems) - 1]); //remove a surplus entry
 	}
@@ -681,12 +681,12 @@ function render_global_se1($game_id) {
 	if (!file_exists("img/{$game_id}_maps")) {
 		mkdir("img/{$game_id}_maps", 0777);
 	}
-	ImagePng($im, "img/${game_id}_maps/sm_full.png");
-	ImagePng($bb_im, "img/${game_id}_maps/bb_full.png");
-	ImagePng($p_im, "img/${game_id}_maps/psm_full.png");
+	ImagePng($im, "img/{$game_id}_maps/sm_full.png");
+	ImagePng($bb_im, "img/{$game_id}_maps/bb_full.png");
+	ImagePng($p_im, "img/{$game_id}_maps/psm_full.png");
 
 	if($extinfo) {
-		print("<br><br><br><hr><img src='$directories[images]/${game_id}_maps/sm_full.png' onLoad='this.scrollIntoView();'>");
+		print("<br><br><br><hr><img src='$directories[images]/{$game_id}_maps/sm_full.png' onLoad='this.scrollIntoView();'>");
 
 	}
 	ImageDestroy($im);
@@ -702,9 +702,9 @@ function renderLocal($game_id) {
 		trigger_error('Map image is missing - dir does not exist', E_USER_ERROR);
 	}
 
-	$full_map = imagecreatefrompng("img/${game_id}_maps/bb_full.png");
+	$full_map = imagecreatefrompng("img/{$game_id}_maps/bb_full.png");
 
-	db("select star_id, x_loc, y_loc from ${game_id}_stars");
+	db("select star_id, x_loc, y_loc from {$game_id}_stars");
 	while($star = dbr()) {
 
 		$im = imagecreatetruecolor($UNI['localmapwidth'], $UNI['localmapheight']);
@@ -721,7 +721,7 @@ function renderLocal($game_id) {
 
 		imagepng($im, 'img/' . $game_id . '_maps/sm' . $star['star_id'] . '.png');
 		if($extinfo) {
-			print("<br><img src='img/${game_id}_maps/sm$star[star_id].png' onLoad='this.scrollIntoView();'>");
+			print("<br><img src='img/{$game_id}_maps/sm$star[star_id].png' onLoad='this.scrollIntoView();'>");
 
 		}
 

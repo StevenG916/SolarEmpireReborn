@@ -14,12 +14,12 @@ if ($user['joined_game'] > (time() - ($min_b4_trans * 86400)) && $user['login_id
 }
 
 #get information from DB about target player.
-db("select login_id, login_name, clan_id from ${db_name}_users where login_id = $target");
+db("select login_id, login_name, clan_id from {$db_name}_users where login_id = $target");
 $target = dbr();
 
 if($sudden_death == 1 && $user['login_id'] != ADMIN_ID) { //SD check
 	#ensure target isn't dead.
-	db("select count(ship_id) from ${db_name}_ships where login_id = '$target[login_id]'");
+	db("select count(ship_id) from {$db_name}_ships where login_id = '$target[login_id]'");
 	$count = dbr();
 
 	if(!isset($count[0]) || (isset($count[0]) && $count[0] <= 0) ) {
@@ -37,7 +37,7 @@ if(isset($do_ship)) { //user has selected stuff to transfer
 	$loop_txt = "";
 	$rs .= "<p><a href=send_ship.php?target=$target[login_id]>Transfer Another Ship</a><br>";
 
-	db("select count(ship_id) from ${db_name}_ships where login_id = '$target[login_id]'");
+	db("select count(ship_id) from {$db_name}_ships where login_id = '$target[login_id]'");
 	$ship_count = dbr();
 
 	if($user['cash'] < $estimated_cost) { # ensure have enough cash
@@ -57,7 +57,7 @@ if(isset($do_ship)) { //user has selected stuff to transfer
 				continue;
 			}
 
-			db("select config REGEXP 'bs' as is_warship, ship_name, login_id, config from ${db_name}_ships where ship_id = '$ship_id'");
+			db("select config REGEXP 'bs' as is_warship, ship_name, login_id, config from {$db_name}_ships where ship_id = '$ship_id'");
 			$this_ship = dbr(1);
 
 			if(empty($this_ship)){
@@ -73,7 +73,7 @@ if(isset($do_ship)) { //user has selected stuff to transfer
 			} else {
 				$loop_txt .= "<b class=b1>$this_ship[ship_name]</b> transfered successfully.<br>";
 
-				dbn("update ${db_name}_ships set login_id = '$target[login_id]', login_name = '$target[login_name]', towed_by = 0, clan_id = $target[clan_id], metal=0, fuel=0, elect=0, organ=0, colon=0 where ship_id = '$ship_id'");
+				dbn("update {$db_name}_ships set login_id = '$target[login_id]', login_name = '$target[login_name]', towed_by = 0, clan_id = $target[clan_id], metal=0, fuel=0, elect=0, organ=0, colon=0 where ship_id = '$ship_id'");
 
 				//ensure don't go over the limit
 				$transfer_counter ++;
@@ -99,7 +99,7 @@ $text .= "Select ships to sign over to <b class='b1'>$target[login_name]</b>, th
 $text .= "<b class=b1>Note</b>: All cargo will be jettisoned from any ships getting transfered.<br>";
 $text .= "<form action=send_ship.php method=POST name=transfer_ships><table>";
 
-db("select ship_name, class_name, location, fighters, max_fighters, shields, max_shields, config, ship_id from ${db_name}_ships where login_id = '$user[login_id]' && ship_id != '$user[ship_id]' order by class_name");
+db("select ship_name, class_name, location, fighters, max_fighters, shields, max_shields, config, ship_id from {$db_name}_ships where login_id = '$user[login_id]' && ship_id != '$user[ship_id]' order by class_name");
 $ships = dbr(1);
 
 if(!isset($ships)){	#ensure there are some ships to display

@@ -78,7 +78,7 @@ if(isset($send_message)){
 		$out_str .= quick_row("Avg. Page Views/Player:",number_format($serv1[3]/$serv1[0],2));
 		$out_str .= "</table><br><br><br>";
 
-		$out_str .= "<b class=b1>MySQL Server Details</b><br>".preg_replace("/  /","<br>", mysql_stat($database_link));
+		$out_str .= "<b class=b1>MySQL Server Details</b><br>".preg_replace("/  /","<br>", mysqli_stat($GLOBALS['database_link']));
 
 
 	} else{
@@ -88,23 +88,23 @@ if(isset($send_message)){
 		db2("select * from se_games order by name");
 		while ($game = dbr2()){
 			$db_name = $game['db_name'];
-			db("select count(login_id),sum(cash),sum(turns),sum(turns_run),sum(ships_killed), sum(fighters_lost) as lost_fighters, sum(fighters_killed) as killed_fighters from ${db_name}_users where login_id != " . ADMIN_ID);
+			db("select count(login_id),sum(cash),sum(turns),sum(turns_run),sum(ships_killed), sum(fighters_lost) as lost_fighters, sum(fighters_killed) as killed_fighters from {$db_name}_users where login_id != " . ADMIN_ID);
 			$ct = dbr();
-			db("select count(login_id) from ${db_name}_users where ship_id != NULL && login_id != " . ADMIN_ID);
+			db("select count(login_id) from {$db_name}_users where ship_id != NULL && login_id != " . ADMIN_ID);
 			$ct2 = dbr();
-			db("select count(login_id), sum(fighters) from ${db_name}_ships where login_id != " . ADMIN_ID);
+			db("select count(login_id), sum(fighters) from {$db_name}_ships where login_id != " . ADMIN_ID);
 			$ct3 = dbr();
-			db("select count(planet_id), sum(fighters), sum(colon), sum(elect), sum(metal), sum(fuel) from ${db_name}_planets where planet_type >= 0 && login_id != " . ADMIN_ID);
+			db("select count(planet_id), sum(fighters), sum(colon), sum(elect), sum(metal), sum(fuel) from {$db_name}_planets where planet_type >= 0 && login_id != " . ADMIN_ID);
 			$ct4 = dbr();
-			db("select count(distinct clan_id), count(login_id) from ${db_name}_users where clan_id > 0 && login_id != " . ADMIN_ID);
+			db("select count(distinct clan_id), count(login_id) from {$db_name}_users where clan_id > 0 && login_id != " . ADMIN_ID);
 			$ct5 = dbr();
-			db("select count(news_id) from ${db_name}_news");
+			db("select count(news_id) from {$db_name}_news");
 			$ct6 = dbr();
-			db("select count(message_id) from ${db_name}_messages where login_id = -1");
+			db("select count(message_id) from {$db_name}_messages where login_id = -1");
 			$forum_posts = dbr();
-			db("select count(message_id) from ${db_name}_messages where login_id > 1");
+			db("select count(message_id) from {$db_name}_messages where login_id > 1");
 			$player_mess = dbr();
-			db("select count(message_id) from ${db_name}_messages where login_id = -5");
+			db("select count(message_id) from {$db_name}_messages where login_id = -5");
 			$clan_forum_posts = dbr();
 			$out_str .= "<table border=0 cellpadding=5><tr valign=top><td colspan=3>";
 			$out_str .= make_table(array("",""));
@@ -189,8 +189,8 @@ if(isset($send_message)){
 	$tables_str = "";
 	$count = 0;
 	//select all tables from the DB
-	$tables = mysql_list_tables(DATABASE);
-	while ($row = mysql_fetch_row($tables)) {
+	db("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" . DATABASE . "'");
+	while ($row = dbr(0)) {
 		$tables_str .= " `$row[0]`, ";
 		++$count;
 	}

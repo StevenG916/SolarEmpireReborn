@@ -6,7 +6,7 @@ $filename = "port.php";
 
 sudden_death_check($user);
 
-db("select * from ${db_name}_ports where location = '$user[location]'");
+db("select * from {$db_name}_ports where location = '$user[location]'");
 $port = dbr();
 
 if (!$port) {
@@ -104,7 +104,7 @@ if(isset($deal)) {
 				$error_str .= "Your ship can not hold that much $resource_str.<p>";
 			} else {
 				take_cash($amount * $buy_cost);
-				dbn("update ${db_name}_ships set $resource_deal = $resource_deal + $amount where ship_id = $user[ship_id]");
+				dbn("update {$db_name}_ships set $resource_deal = $resource_deal + $amount where ship_id = $user[ship_id]");
 				$user_ship[$resource_deal] += $amount;
 				$error_str .= "You have purchased <b>$amount</b> units of $resource_str, for the sum of <b>".$amount*$buy_cost."</b> Credits.<p>";
 			}
@@ -114,7 +114,7 @@ if(isset($deal)) {
 				$error_str .= "You do not have that much $resource_str.<p>";
 			} else {
 				give_cash($amount * $sell_cost);
-				dbn("update ${db_name}_ships set $resource_deal = $resource_deal - $amount where ship_id = $user[ship_id]");
+				dbn("update {$db_name}_ships set $resource_deal = $resource_deal - $amount where ship_id = $user[ship_id]");
 				$user_ship[$resource_deal] -= $amount;
 				$error_str .= "You sold <b>$amount</b> units of $resource_str, for the sum of <b>".$amount*$sell_cost."</b> Credits.<p>";
 			}
@@ -133,7 +133,7 @@ if(isset($sell_all)) {
 	if(isset($all_ships)) {#all being sold from all ships
 		$sold_worth = 0;
 		$ship_count = 0;
-		db("select elect,fuel,metal,organ,ship_id from ${db_name}_ships where location = $user[location] and login_id = $user[login_id]");
+		db("select elect,fuel,metal,organ,ship_id from {$db_name}_ships where location = $user[location] and login_id = $user[login_id]");
 		while ($current_ship = dbr()) {
 			$sold_worth += (($current_ship['elect'] * $elect_sell) + ($current_ship['fuel'] * $fuel_sell) + ($current_ship['metal'] * $metal_sell) + ($current_ship['organ'] * $organ_sell));
 			$elect_sold = $elect_sold + $current_ship['elect'];
@@ -154,7 +154,7 @@ if(isset($sell_all)) {
 		} elseif(!isset($sure)) {
 			get_var('Sell all cargo',$filename,"Are you sure you want to sell all cargo from all your ships currently in this star system with cargo (<b>$ship_count</b> of them)?<p>This will cost you <b>5</b> turns and will generate revenues of about <b>$sold_worth</b> Credits.",'sure','yes');
 		} else {
-			dbn("update ${db_name}_ships set elect = 0, metal = 0, fuel = 0, organ = 0 where location = '$user[location]' && login_id = '$user[login_id]' && cargo_bays > 0");
+			dbn("update {$db_name}_ships set elect = 0, metal = 0, fuel = 0, organ = 0 where location = '$user[location]' && login_id = '$user[login_id]' && cargo_bays > 0");
 			charge_turns(5);
 			$error_str .= "All cargo from all ships in this star system sold.";
 			$error_str .= "<p>Metal Sold: <b>$metal_sold</b><br>Fuel Sold: <b>$fuel_sold</b><br>Electronics Sold: <b>$elect_sold</b><br>Organics Sold: <b>$organ_sold</b>";
@@ -178,7 +178,7 @@ if(isset($sell_all)) {
 				get_var('Sell all cargo',$filename,"Are you sure you want to sell all cargo from this ship?<p>This will cost you <b>1</b> turn, and add <b>$sold_worth</b> Credits to your funds.",'sure','yes');
 			}
 		} else {
-			dbn("update ${db_name}_ships set elect = 0, metal = 0, fuel = 0, organ = 0 where ship_id = '$user[ship_id]'");
+			dbn("update {$db_name}_ships set elect = 0, metal = 0, fuel = 0, organ = 0 where ship_id = '$user[ship_id]'");
 			$elect_sold = $elect_sold + $user_ship['elect'];
 			$fuel_sold = $fuel_sold + $user_ship['fuel'];
 			$metal_sold = $metal_sold + $user_ship['metal'];
@@ -196,7 +196,7 @@ if(isset($sell_all)) {
 		}
 	}
 	if ($user['login_id'] != ADMIN_ID) {
-		dbn("update ${db_name}_users set cash = cash + $sold_worth where login_id = $user[login_id]");
+		dbn("update {$db_name}_users set cash = cash + $sold_worth where login_id = $user[login_id]");
 		$user['cash'] += $sold_worth;
 	}
 		$user_ship['metal'] = 0;

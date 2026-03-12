@@ -25,9 +25,9 @@ function resolve_difficulty($diff)
 }
 
 
-db("select count(login_id),sum(cash),sum(turns),sum(turns_run),sum(ships_killed), sum(fighters_lost) as lost_fighters, sum(fighters_killed) as killed_fighters, sum(tech) as tech from ${db_name}_users where login_id != " . ADMIN_ID);
+db("select count(login_id),sum(cash),sum(turns),sum(turns_run),sum(ships_killed), sum(fighters_lost) as lost_fighters, sum(fighters_killed) as killed_fighters, sum(tech) as tech from {$db_name}_users where login_id != " . ADMIN_ID);
 $ct = dbr();
-db("select count(login_id) from ${db_name}_users where ship_id != 1 && login_id != " . ADMIN_ID);
+db("select count(login_id) from {$db_name}_users where ship_id != 1 && login_id != " . ADMIN_ID);
 $ct2 = dbr();
 
 db("select description, admin_name, name, paused,last_reset,difficulty from se_games where db_name = '$db_name'");
@@ -75,7 +75,7 @@ echo "<br><br>";
 //Admin board
 //admin news start
 echo "<table border=0 cellpadding=5><tr valign=top><td colspan=3>";
-db("select headline,timestamp from ${db_name}_news where login_id = -1 || login_id = -11 order by timestamp desc LIMIT 5");
+db("select headline,timestamp from {$db_name}_news where login_id = -1 || login_id = -11 order by timestamp desc LIMIT 5");
 $news = dbr();
 if($news){
 	echo "Last 5 news headlines from Admin:<br>";
@@ -92,7 +92,7 @@ if($news){
 //Start of the Viewable Information.
 echo "</td></tr>";
 
-db("select count(planet_id),sum(fighters),sum(cash) as cash, sum(tech) as tech from ${db_name}_planets where login_id != 1 && planet_type >=0");
+db("select count(planet_id),sum(fighters),sum(cash) as cash, sum(tech) as tech from {$db_name}_planets where login_id != 1 && planet_type >=0");
 $ct4 = dbr();
 
 if(isset($ct2[0])) {
@@ -119,7 +119,7 @@ if(isset($ct2[0])) {
 	echo "</table><br>";
 	echo "</tr><td>";
 
-	db("select count(login_id),sum(fighters) from ${db_name}_ships where login_id != 1 and login_id !=0");
+	db("select count(login_id),sum(fighters) from {$db_name}_ships where login_id != 1 and login_id !=0");
 	$ct3 = dbr();
 	if($ct3[0] > 0) {
 		echo make_table(array("Ships","<b>$ct3[0]</b>"));
@@ -137,7 +137,7 @@ if(isset($ct2[0])) {
 		echo "</table><br>";
 	}
 
-	db("select count(distinct clan_id),count(login_id) from ${db_name}_users where clan_id > 0 && login_id != " . ADMIN_ID);
+	db("select count(distinct clan_id),count(login_id) from {$db_name}_users where clan_id > 0 && login_id != " . ADMIN_ID);
 	$ct5 = dbr();
 	if(!empty($ct5[0])) {
 		echo make_table(array("Clans","<b>$ct5[0]</b>"));
@@ -149,7 +149,7 @@ if(isset($ct2[0])) {
 
 	#echo "Top 10 Players<br>";
 	echo make_table(array("Score","Login Name"));
-	db("select login_name,clan_id,clan_sym,clan_sym_color,score from ${db_name}_users where ship_id != 1 and login_id != " . ADMIN_ID . " order by score desc, login_name limit 10");
+	db("select login_name,clan_id,clan_sym,clan_sym_color,score from {$db_name}_users where ship_id != 1 and login_id != " . ADMIN_ID . " order by score desc, login_name limit 10");
 	$players = dbr();
 
 	while(($players)) {

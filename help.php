@@ -145,12 +145,12 @@ if (isset($special_info)) {
 	} elseif($admin_var_show == 0) {
 		$error_str .= "The Admin of this game, doesn't want the game variables displayed.";
 	} else {
-		db("select * from ${db_name}_db_vars order by name");
+		db("select * from {$db_name}_db_vars order by name");
 		$error_str .= "<h3><b>Game Variables</b></h3>Shown below are all the variables for the game, as set by the Admin.";
 		$error_str .= "<table border=0 cellspacing=1 width=350>";
 		while($var = dbr()) {
-			$error_str .= "<tr bgcolor=#333333><td width=220>$var[name] = ${var['value']}</td>";
-			$error_str .= "<tr bgcolor=#555555><td><blockquote>${var['descript']}<br></td>";
+			$error_str .= "<tr bgcolor=#333333><td width=220>$var[name] = {$var['value']}</td>";
+			$error_str .= "<tr bgcolor=#555555><td><blockquote>{$var['descript']}<br></td>";
 			$error_str .= "<tr bgcolor=#000000><td colspan=2>&nbsp;</td></tr>";
 		}
 		$error_str .= "</table>";
@@ -191,14 +191,13 @@ if (isset($special_info)) {
 		$error_str .= "<h3>Ship Listing</h3><p>Listed below is information for all ships that can be brought from the blackmarkets.</p>";
 	}
 		$ship_types_2 = $ship_types;
-		while($ship_array_1 = each($ship_types_2)) {
-			$ship_stats_1 = $ship_array_1[0];
+		foreach($ship_types_2 as $ship_stats_1 => $ship_stats_1_value) {
 			$ship_stats = $ship_types[$ship_stats_1];
 			if(($ship_stats['type_id'] >= 300 && $shipno==-2) || ($ship_stats['type_id'] < 300 && $shipno==-1 && $ship_stats['type_id'] != 1)){
 				$ship_stats['cost'] = number_format($ship_stats['cost']);
 				$ship_stats['tcost'] = number_format($ship_stats['tcost']);
 				$error_str .= make_table(array(),"WIDTH=75%");
-				$img_txt = "<tr><td colspan=2><center><a href=\"img/ships/ship_{$ship_stats['type_id']}.jpg\"><img height=\"120\" width=\"160\" src=\"img/ships/ship_${ship_stats['type_id']}_tn.jpg\" /></a></center></td></tr>";
+				$img_txt = "<tr><td colspan=2><center><a href=\"img/ships/ship_{$ship_stats['type_id']}.jpg\"><img height=\"120\" width=\"160\" src=\"img/ships/ship_{$ship_stats['type_id']}_tn.jpg\" /></a></center></td></tr>";
 				$error_str .= "<tr><td colspan=2 align='center' bgcolor='#555555'><b>$ship_stats[name]</b> ($ship_stats[class_abbr]) </td></tr>$img_txt";
 				$error_str .= quick_row("<b>Size</b>",discern_size($ship_stats['size']));
 				$error_str .= quick_row("<b>Type</b>","$ship_stats[type]");
@@ -246,7 +245,7 @@ if (isset($special_info)) {
 			$error_str .= "<p>".make_table(array("",""),"WIDTH=75%");
 		}
 
-		$img_txt = "<tr><td colspan=2><center><a href=img/ships/ship_${ship_stats['type_id']}.jpg target=_blank><img border=0 height=120 width=160 src='img/ships/ship_${ship_stats['type_id']}_tn.jpg'></a></center></td></tr>";
+		$img_txt = "<tr><td colspan=2><center><a href=img/ships/ship_{$ship_stats['type_id']}.jpg target=_blank><img border=0 height=120 width=160 src='img/ships/ship_{$ship_stats['type_id']}_tn.jpg'></a></center></td></tr>";
 		$error_str .= "<tr><td colspan=2 align='center' bgcolor='#555555'><b>$ship_stats[name]</b> ($ship_stats[class_abbr]) </td></tr>$img_txt";
 		$error_str .= quick_row("<b>Size</b>",discern_size($ship_stats['size']));
 		$error_str .= quick_row("<b>Type</b>","$ship_stats[type]");

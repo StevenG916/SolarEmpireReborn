@@ -36,7 +36,7 @@ $rs = "<p><a href=equip_shop.php>Return to Equipment Shop</a>";
 settype($amount, 'int');
 $amount = round($amount);
 
-//db ("select value from ${db_name}_db_vars where name = 'flag_bomb'");
+//db ("select value from {$db_name}_db_vars where name = 'flag_bomb'");
 //$varsforgame = dbr();
 
 if($switch == 1){#someone is switching mining types.
@@ -50,14 +50,14 @@ if($switch == 1){#someone is switching mining types.
 		get_var('Switch Mining',$filename,"Are you sure you want to switch mining rates on this ship? At present this ship has a metal mining rate of: <b>$user_ship[mine_rate_metal]</b> and a fuel mining rate of: <b>$user_ship[mine_rate_fuel]</b>.<br><br>For the cost of <b>$mining_switch_cost</b> credits, you can make the metal rate: <b>$user_ship[mine_rate_fuel]</b>, and the fuel rate: <b>$user_ship[mine_rate_metal]</b>.<br><br>This can be reversed at any time by purchasing another mining switch.<br>This will <b class=b1>NOT</b> use an upgrade slot.",'sure','');
 	} else {
 		take_cash($mining_switch_cost);
-		dbn("update ${db_name}_ships set mine_rate_fuel = $user_ship[mine_rate_metal], mine_rate_metal = $user_ship[mine_rate_fuel] where ship_id = '$user_ship[ship_id]'");
+		dbn("update {$db_name}_ships set mine_rate_fuel = $user_ship[mine_rate_metal], mine_rate_metal = $user_ship[mine_rate_fuel] where ship_id = '$user_ship[ship_id]'");
 		$temp4854 = $user_ship[mine_rate_metal];
 		$user_ship[mine_rate_metal] = $user_ship[mine_rate_fuel];
 		$user_ship[mine_rate_fuel] = $temp4854;
 		$error_str .= "Mining Rates switched for <b>$mining_switch_cost</b> Credits.<p>";
 	}
 } elseif($mass_switch){ #switch the fleet
-	db("select sum(s.cost / 10)as cost, count(ship_id) as num from ${db_name}_ship_types s, ${db_name}_ships us where s.type_id = us.shipclass && location='$user[location]' && us.login_id='$user[login_id]' && ship_id != 1 && (s.mine_rate_fuel > 1 || s.mine_rate_metal > 1) group by us.login_id");
+	db("select sum(s.cost / 10)as cost, count(ship_id) as num from {$db_name}_ship_types s, {$db_name}_ships us where s.type_id = us.shipclass && location='$user[location]' && us.login_id='$user[login_id]' && ship_id != 1 && (s.mine_rate_fuel > 1 || s.mine_rate_metal > 1) group by us.login_id");
 	$total_cost = dbr();
 	$total_cost[cost] = round($total_cost[cost]);
 	if($alternate_play_1 != 1){
@@ -70,12 +70,12 @@ if($switch == 1){#someone is switching mining types.
 		get_var('Switch Mining',$filename,"Are you sure you want to switch mining rates on <b>$total_cost[num]</b> ships in this system? The price will be <b>$total_cost[cost]</b> Credits<br><br>This can be reversed at any time by purchasing another mining switch.<br>This will <b class=b1>NOT</b> use any upgrade slots.",'sure','');
 	} else {
 		take_cash($total_cost[cost]);
-		db("select ship_id,mine_rate_fuel,mine_rate_metal from ${db_name}_ships where location='$user[location]' && login_id='$user[login_id]' && ship_id != 1 && (mine_rate_fuel > 1 || mine_rate_metal > 1)");
+		db("select ship_id,mine_rate_fuel,mine_rate_metal from {$db_name}_ships where location='$user[location]' && login_id='$user[login_id]' && ship_id != 1 && (mine_rate_fuel > 1 || mine_rate_metal > 1)");
 		while($results=dbr()){
-			dbn("update ${db_name}_ships set mine_rate_fuel = '$results[mine_rate_metal]', mine_rate_metal = '$results[mine_rate_fuel]' where ship_id = $results[ship_id]");
+			dbn("update {$db_name}_ships set mine_rate_fuel = '$results[mine_rate_metal]', mine_rate_metal = '$results[mine_rate_fuel]' where ship_id = $results[ship_id]");
 		}
 
-#		dbn("update ${db_name}_ships set mine_rate_fuel = mine_rate_metal, mine_rate_metal = mine_rate_fuel where location='$user[location]' && login_id='$user[login_id]' && ship_id != 1 && (mine_rate_fuel > 1 || mine_rate_metal > 1)");
+#		dbn("update {$db_name}_ships set mine_rate_fuel = mine_rate_metal, mine_rate_metal = mine_rate_fuel where location='$user[location]' && login_id='$user[login_id]' && ship_id != 1 && (mine_rate_fuel > 1 || mine_rate_metal > 1)");
 
 		$temp4854 = $user_ship[mine_rate_metal];
 		$user_ship[mine_rate_metal] = $user_ship[mine_rate_fuel];
@@ -114,7 +114,7 @@ function buy_basic ($item_sql, $item_max_sql, $item_str, $cost){
 			$ret_str .= "<b>$amount</b> <b class=b1>$item_str</b> purchased for <b>$total_cost</b> Credits.<p>";
 			take_cash($total_cost);
 
-			dbn("update ${db_name}_ships set $item_sql = $item_sql + '$amount' where ship_id = '$user_ship[ship_id]'");
+			dbn("update {$db_name}_ships set $item_sql = $item_sql + '$amount' where ship_id = '$user_ship[ship_id]'");
 
 			$user_ship[$item_sql] += $amount;
 		}
@@ -142,7 +142,7 @@ if(isset($buy)) {
 			} else {
 				$error_str .= "Genesis device purchased for <b>$genesis_cost</b> Credits.<p>";
 				take_cash($genesis_cost);
-				dbn("update ${db_name}_users set genesis = genesis + 1 where login_id = $user[login_id]");
+				dbn("update {$db_name}_users set genesis = genesis + 1 where login_id = $user[login_id]");
 			}
 		}
 	} elseif($buy == 6) { // gamma bomb
@@ -154,7 +154,7 @@ if(isset($buy)) {
 			} elseif ((!$flag_bomb) || ($user[login_id] ==1)) {
 				$error_str .= "Gamma bomb purchased for <b>$bomb_cost</b> Credits.<p>";
 		take_cash($bomb_cost);
-	dbn("update ${db_name}_users set gamma = gamma + 1 where login_id = $user[login_id]");
+	dbn("update {$db_name}_users set gamma = gamma + 1 where login_id = $user[login_id]");
 		} else {
 			$error_str .= "Admin has disabled the purchasing of Bombs. However if you have one you can still use it.<p>";
 			}
@@ -168,7 +168,7 @@ if(isset($buy)) {
 			} elseif ((!$flag_bomb) || ($user[login_id] ==1)) {
 				$error_str .= "Alpha bomb purchased for <b>$bomb_cost</b> Credits.<p>";
 		take_cash($bomb_cost);
-	dbn("update ${db_name}_users set alpha = alpha + 1 where login_id = $user[login_id]");
+	dbn("update {$db_name}_users set alpha = alpha + 1 where login_id = $user[login_id]");
 		} else {
 			$error_str .= "Admin has disabled the purchasing of Bombs. However if you have one you can still use it.<p>";
 			}
@@ -187,12 +187,12 @@ if(isset($buy)) {
 	} else {
 				$error_str .= "SuperNova Effector purchased for <b>$sn_cost</b> Credits.<p>";
 		take_cash($sn_cost);
-		dbn("update ${db_name}_users set sn_effect = 1 where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set sn_effect = 1 where login_id = '$user[login_id]'");
 		}
 	} elseif($buy == 10){
 	$taken = 0; //Fighters taken from planet so far.
 	$ship_counter = 0;
-	db("select sum(max_fighters-fighters), count(ship_id) from ${db_name}_ships where location=1 && login_id='$user[login_id]' && max_fighters > 0 && fighters < max_fighters");
+	db("select sum(max_fighters-fighters), count(ship_id) from {$db_name}_ships where location=1 && login_id='$user[login_id]' && max_fighters > 0 && fighters < max_fighters");
 	$maths=dbr();
 		if($user[cash] < $fighter_cost){
 		print_page("Failed","You don't have enough money for one fighter, let alone a fleet of them.<br>Come back when you can afford it");
@@ -201,13 +201,13 @@ if(isset($buy)) {
 		} elseif($sure != "yes") {
 		get_var('Load all ships','equip_shop.php',"There are <b>$maths[0]</b> empty fighter bays in <b>$maths[1]</b> ships in this system. <br>Do you want to fill as many as you can afford to fill?",'sure','yes');
 		} else {
-			db2("select ship_id,fighters,max_fighters,ship_name from ${db_name}_ships where login_id = '$user[login_id]' && location = '1' && max_fighters > 0 && fighters < max_fighters order by max_fighters desc");
+			db2("select ship_id,fighters,max_fighters,ship_name from {$db_name}_ships where login_id = '$user[login_id]' && location = '1' && max_fighters > 0 && fighters < max_fighters order by max_fighters desc");
 			while($ships = dbr2()) {
 				//player can load ship.
 				$free = $ships[max_fighters] - $ships[fighters];
 				if($user[cash] >= ($free * $fighter_cost)) {
 					$ship_counter++;
-					dbn("update ${db_name}_ships set fighters = max_fighters where ship_id = '$ships[ship_id]'");
+					dbn("update {$db_name}_ships set fighters = max_fighters where ship_id = '$ships[ship_id]'");
 					$out .= "<br><b class=b1>$ships[ship_name]</b> had its fighter cargo increased by <b>$free</b> to maximum capacity.";
 					if($ships[ship_id] == $user_ship[ship_id]){
 						$user_ship[fighters] = $user_ship[max_fighters];
@@ -218,7 +218,7 @@ if(isset($buy)) {
 				} else {
 					$ship_counter++;
 					$t868 = $ships[fighters] + floor($user[cash]/$fighter_cost);
-					dbn("update ${db_name}_ships set fighters = '$t868' where ship_id = '$ships[ship_id]'");
+					dbn("update {$db_name}_ships set fighters = '$t868' where ship_id = '$ships[ship_id]'");
 					if($ships[ship_id] == $user_ship[ship_id]){
 						$user_ship[fighters] = $t868;
 					}

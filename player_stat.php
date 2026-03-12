@@ -37,7 +37,7 @@ if ($table == 2) {
 	}
 	$text .= "<br>Ordered by <b>$order_by_str</b>";
 	$text .= make_table(array("Name","Signed Up","Last Attack","Last Attack Date","Clan","Score"));
-	db("select login_name,joined_game,last_attack_by,last_attack,clan_sym,score,clan_sym_color,login_id from ${db_name}_users where login_id > 5 order by $sql_order_str $order_dir");
+	db("select login_name,joined_game,last_attack_by,last_attack,clan_sym,score,clan_sym_color,login_id from {$db_name}_users where login_id > 5 order by $sql_order_str $order_dir");
 } elseif ($table == 3) {
 	$text .= "<a href=$filename>General</a> - <a href=$filename?table=2>Misc</a> - Alive Players<br>";
 	$sql_order_str = 0;
@@ -45,7 +45,7 @@ if ($table == 2) {
 
 	$not_at_zero = 0;
 	$sql_select_ships = "";
-	db("select count(*) as count, login_id from ${db_name}_ships where login_id > 5 group by login_id order by count desc");
+	db("select count(*) as count, login_id from {$db_name}_ships where login_id > 5 group by login_id order by count desc");
 	while($return = dbr(1)){
 		if($return['count'] < 1){
 			echo $return['count'];
@@ -58,7 +58,7 @@ if ($table == 2) {
 	} else {
 		$sql_select_ships = preg_replace("/\|\| $/", "", $sql_select_ships);
 	}
-	db("select cash,login_name,fighters_killed,ships_killed,ships_lost,turns_run,score,login_id from ${db_name}_users where ".$sql_select_ships." order by score $order_dir, fighters_killed $order_dir, ships_killed $order_dir,login_name");
+	db("select cash,login_name,fighters_killed,ships_killed,ships_lost,turns_run,score,login_id from {$db_name}_users where ".$sql_select_ships." order by score $order_dir, fighters_killed $order_dir, ships_killed $order_dir,login_name");
 	$text .= '<br>Top Players Ranking. Only showing Alive Players.';
 	$text .= make_table(array("","Name","Fighters<br>Killed","Ships <br>Killed","Ships <br>Lost","Turns <br>Run","Score"));
 
@@ -94,7 +94,7 @@ if ($table == 2) {
 		$sql_order_str = "score";
 		$order_by_str = "Score";
 	}
-	db("select cash,login_name,fighters_killed,ships_killed,ships_lost,turns_run,score,login_id from ${db_name}_users where login_id > 5 order by $sql_order_str $order_dir");
+	db("select cash,login_name,fighters_killed,ships_killed,ships_lost,turns_run,score,login_id from {$db_name}_users where login_id > 5 order by $sql_order_str $order_dir");
 	$text .= "<br>Ordered by <b>$order_by_str</b>";
 	$text .= make_table(array("Rank","Name","Fighters<br>Killed","Ships <br>Killed","Ships <br>Lost","Turns <br>Run","Score"));
 }

@@ -9,7 +9,7 @@ print "<h1>Star Map</h1>\n";
 if(isset($print)) {
 	$map_url = 'img/' . $db_name . '_maps/psm_full.png';
 } elseif(isset($find)) {
-	db("select count(star_id) from ${db_name}_stars");
+	db("select count(star_id) from {$db_name}_stars");
 	$max_sect = dbr();
 	if($find < 1 || $find > $max_sect[0] || !$find) {
 		$rs = "<p><a href=\"javascript: history.back()\">Back</a>";

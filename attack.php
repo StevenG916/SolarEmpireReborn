@@ -7,7 +7,7 @@ sudden_death_check($user);
 #quark disrupter.
 if(isset($quark)) {
 //if($user[on_planet] != $planet_num) {
-	db("select * from ${db_name}_planets where planet_id = '$planet_num'");
+	db("select * from {$db_name}_planets where planet_id = '$planet_num'");
 	$planet_info = dbr();
 	$sv_turns = 30;
 
@@ -25,7 +25,7 @@ if(isset($quark)) {
 		print_page("Quark Displacer","This is an <b class=b1>Admin </b>planet, and cannot be attacked.");
 	} elseif(!$planet_info['fighters']) {
 		print_page("Quark Displacer","There is no point in attacking this planet with the Quark Displacer, as there are no fighters left on it to destroy.<p><a href=planet.php?planet_id=$planet_info[planet_id]>Land</a> on it, and then claim it to make it yours.");
-	} elseif(!ereg("sv",$user_ship['config'])) {
+	} elseif(!str_contains($user_ship['config'], 'sv')) {
 		print_page("Quark Displacer","This ship does not have a Quark Displacer on it.");
 	} elseif(!isset($sure)) {
 		get_var('Quark Displacer','attack.php',"Are you sure you want to use the Quark Displacer against <b class=b1>$planet_info[planet_name]</b>?",'sure','yes');
@@ -41,12 +41,12 @@ if(isset($quark)) {
 
 		$out_str = "";
 
-		dbn("update ${db_name}_planets set fighters = fighters - '$sv_damage' where planet_id = $planet_num");
+		dbn("update {$db_name}_planets set fighters = fighters - '$sv_damage' where planet_id = $planet_num");
 		$planet_info['fighters'] -= $sv_damage;
 		post_news("<b class=b1>$user[login_name]</b> fired a Quark Displacer at <b class=b1>$planet_info[planet_name]</b>.");
 		if($planet_info['fighters'] < 1) {
 			send_message($planet_info['login_id'],"The <b class=b1>$user_ship[ship_name]</b> fired at your planet <b class=b1>$planet_info[planet_name]</b> with a Quark Displacer, doing <b>$sv_damage</b> damage, and completely destroying all the planets defences.");
-			dbn("update ${db_name}_planets set fighters = 0 where planet_id = $planet_num");
+			dbn("update {$db_name}_planets set fighters = 0 where planet_id = $planet_num");
 			$f_killed = $planet_info['fighters'];
 			$planet_info['fighters'] = 0;
 			$out_str .= "You have done <b>$sv_damage</b> damage to planet <b class=b1>$planet_info[planet_name]</b>, using <b>$sv_turns</b> turns. <p>You completly destroyed all defences on <b class=b1>$planet_info[planet_name]</b>. <br> - <a href=planet.php?planet_id=$planet_info[planet_id]>Land</a><br>";
@@ -55,8 +55,8 @@ if(isset($quark)) {
 			$f_killed = $sv_damage;
 			$out_str .= "You have done <b>$sv_damage</b> damage to planet <b class=b1>$planet_info[planet_name]</b>, at a cost of <b>$sv_turns</b> turns";
 		}
-		dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$f_killed' where login_id = $user[login_id]");
-		dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$f_killed' where login_id = $planet_info[login_id]");
+		dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$f_killed' where login_id = $user[login_id]");
+		dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$f_killed' where login_id = $planet_info[login_id]");
 		print_page("Quark Disrupter",$out_str);
 	}
 }
@@ -66,7 +66,7 @@ if(isset($quark)) {
 if(isset($terra)) {
 
 //if($user[on_planet] != $planet_num) {
-	db("select * from ${db_name}_planets where planet_id = '$planet_num'");
+	db("select * from {$db_name}_planets where planet_id = '$planet_num'");
 	$planet_info = dbr();
 	$sw_turns = 50;
 	$base_percent = 2;
@@ -87,7 +87,7 @@ if(isset($terra)) {
 		print_page("Terra Maelstrom","There is no point in attacking this planet with the Terra Maelstrom, as there are no fighters left on it to destroy.<p><a href=planet.php?planet_id=$planet_info[planet_id]>Land</a> on it, and then claim it to make it yours.");
 	} elseif($enable_superweapons == 0) {
 		print_page("Terra Maelstrom","The admin has disabled the use of terra maelstroms.");
-	} elseif(!ereg("sw",$user_ship['config'])) {
+	} elseif(!str_contains($user_ship['config'], 'sw')) {
 		print_page("Terra Maelstrom","'Ready aim...<br>oh wait a minute, we don't HAVE a Terra Maelstrom installed Captain!'");
 	}	else {
 
@@ -131,12 +131,12 @@ if(isset($terra)) {
 		charge_turns($turn_cost);
 		$out_str ="";
 
-		dbn("update ${db_name}_planets set fighters = fighters - '$sw_damage' where planet_id = $planet_num");
+		dbn("update {$db_name}_planets set fighters = fighters - '$sw_damage' where planet_id = $planet_num");
 		$planet_info['fighters'] -= $sw_damage;
 		post_news("<b class=b1>$user[login_name]</b> fired a Terra Maelstrom at <b class=b1>$planet_info[planet_name]</b>.");
 		if($planet_info['fighters'] < 1) {
 			send_message($planet_info['login_id'],"The <b class=b1>$user_ship[ship_name]</b> fired at your planet <b class=b1>$planet_info[planet_name]</b> with a Terra Maelstrom, doing <b>$sw_damage</b> damage, and completely destroying all the planets defences.");
-			dbn("update ${db_name}_planets set fighters = 0 where planet_id = $planet_num");
+			dbn("update {$db_name}_planets set fighters = 0 where planet_id = $planet_num");
 			$f_killed = $planet_info['fighters'];
 			$planet_info['fighters'] = 0;
 			$out_str .= "You have done <b>$sw_damage</b> damage to planet <b class=b1>$planet_info[planet_name]</b>, using <b>$turn_cost</b> turns. <p>You completly destroyed all defences on <b class=b1>$planet_info[planet_name]</b>. <br> - <a href=planet.php?planet_id=$planet_info[planet_id]>Land</a><br>";
@@ -147,8 +147,8 @@ if(isset($terra)) {
 			$planet_info['fighters'] -= $sw_damage;
 			$out_str .= "You have done <b>$sw_damage</b> damage to planet <b class=b1>$planet_info[planet_name]</b>, at a cost of <b>$turn_cost</b> turns";
 		}
-		dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$f_killed' where login_id = $user[login_id]");
-		dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$f_killed' where login_id = $planet_info[login_id]");
+		dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$f_killed' where login_id = $user[login_id]");
+		dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$f_killed' where login_id = $planet_info[login_id]");
 		print_page("Terra Maelstrom",$out_str);
 	}
 }
@@ -166,9 +166,9 @@ if($flag_space_attack == 0) {
 
 if($target > 0) {
 	// Get target records
-	db("select * from ${db_name}_ships where ship_id = '$target'");
+	db("select * from {$db_name}_ships where ship_id = '$target'");
 	$target_ship = dbr(1);
-	db("select * from ${db_name}_users where login_id = '$target_ship[login_id]'");
+	db("select * from {$db_name}_users where login_id = '$target_ship[login_id]'");
 	$target = dbr(1);
 
 	db(attack_planet_check($db_name,$user));
@@ -186,11 +186,11 @@ if($target > 0) {
 		$error_str = " You can't attack during the first <b>$turns_before_attack</b> turns of having your account.";
 	} elseif($target['turns_run'] < $turns_safe && $user['login_id'] != ADMIN_ID) {
 		$error_str = " The owner of this still under the inital <b>$turns_safe</b> turns protection period.";
-	} elseif(ereg("na",$user_ship['config'])) {
+	} elseif(str_contains($user_ship['config'], 'na')) {
 		$error_str = " Your ship doesn't have the ability to attack.";
-	} elseif(ereg("po",$user_ship['config'])) {
+	} elseif(str_contains($user_ship['config'], 'po')) {
 		$error_str = " Your ship doesn't have the ability to attack other ships.";
-	} elseif(ereg("hs",$target_ship['config']) && !ereg("sc",$user_ship['config']) && $user['login_id'] != ADMIN_ID) {
+	} elseif(str_contains($target_ship['config'], 'hs') && !str_contains($user_ship['config'], 'sc') && $user['login_id'] != ADMIN_ID) {
 		$error_str = " You cannot attack a fully cloaked ship, without a scanner. These can be brought from the accessories & upgrade store on Earth.";
 	} elseif($target['login_id'] == $user['login_id']) {
 		$error_str = " You may not attack yourself.";
@@ -200,14 +200,14 @@ if($target > 0) {
 		$error_str = "You may not attack a clan member.";
 	//} elseif(($user[nap_id] == $target[nap_id]) && $user[nap_id] > 0) {
 	//	$error_str = "You may not attack a member of a clan you have a NAP with.";
-	} elseif(isset($sure) != 'yes' && (ereg("hs",$target_ship['config']) || $user['login_id'] == ADMIN_ID)) {
+	} elseif(isset($sure) != 'yes' && (str_contains($target_ship['config'], 'hs') || $user['login_id'] == ADMIN_ID)) {
 		get_var('Attack','attack.php',"Are you sure you want to attack ".print_name($target)."?",'sure','yes');
-	} elseif(!isset($sure) && ereg("hs",$target_ship['config'])) {
+	} elseif(!isset($sure) && str_contains($target_ship['config'], 'hs')) {
 		get_var('Attack','attack.php',"Are you sure you want to attack a ship when you do not know who it's owner is?",'sure','yes');
 	}else {
 
 		#determine if there is a fleet defending ship in the system
-		db("select * from ${db_name}_ships where login_id = '$target[login_id]' && location = '$user[location]' && defend_fleet = 1 order by fighters desc");
+		db("select * from {$db_name}_ships where login_id = '$target[login_id]' && location = '$user[location]' && defend_fleet = 1 order by fighters desc");
 		$new_target_ship = dbr();
 
 		if(!empty($new_target_ship['ship_id']) && $target_ship['ship_id'] != $new_target_ship['ship_id']){
@@ -507,9 +507,9 @@ if($target > 0) {
 			$tech_str .= "<br><br>Defensive Turrets:".make_table(array("","<b class=b1>".$user_ship['ship_name']."</b>","<b class=b1>".$target_ship['ship_name']."</b>")).make_row(array("<b class=b1>Num. Fighters Destroyed</b>","$u_dt_d","$t_dt_d"))."</table>";
 
 			#update the database with fighter kills for dt.
-			dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$u_dt_d', fighters_lost = fighters_lost + '$t_dt_d' where login_id = '$user[login_id]'");
+			dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$u_dt_d', fighters_lost = fighters_lost + '$t_dt_d' where login_id = '$user[login_id]'");
 
-			dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$t_dt_d', fighters_lost = fighters_lost + '$u_dt_d' where login_id = '$target[login_id]'");
+			dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$t_dt_d', fighters_lost = fighters_lost + '$u_dt_d' where login_id = '$target[login_id]'");
 
 		}
 
@@ -706,7 +706,7 @@ if($target > 0) {
 
 		function inc_dam($stat,$ship,$num){
 		#user battleship
-			if (eregi($stat,$ship['config'])){
+			if (str_contains($ship['config'], $stat)){
 				return $num;
 			}
 		}
@@ -898,11 +898,11 @@ if($target > 0) {
 		if($t_destroyed ==1){
 			$send_to_func_t = -1;
 			$t_des_text = "Yes";
-			dbn("update ${db_name}_ships set points_killed = points_killed + '$target_ship[point_value]' where ship_id = '$user_ship[ship_id]'");
+			dbn("update {$db_name}_ships set points_killed = points_killed + '$target_ship[point_value]' where ship_id = '$user_ship[ship_id]'");
 		} else {
 			$send_to_func_t = $attack_damage;
 			$t_des_text = "No";
-			dbn("update ${db_name}_ships set points_killed = points_killed + '$user_ship[point_value]' where ship_id = '$target_ship[ship_id]'");
+			dbn("update {$db_name}_ships set points_killed = points_killed + '$user_ship[point_value]' where ship_id = '$target_ship[ship_id]'");
 		}
 
 		$tech_str .= make_row(array("<b class=b1>Ship Destroyed?</b>",$u_des_text, $t_des_text))."</table>";
@@ -921,7 +921,7 @@ if($target > 0) {
 			post_news("<b class=b1>$user[login_name]</b> destroyed <b class=b1>$target[login_name]</b>'s $target_ship[class_name].");
 
 			#Raiding of a ship
-			if(ereg("rd",$user_ship['config'])) {
+			if(str_contains($user_ship['config'], 'rd')) {
 				$target_ship_bays = $target_ship['cargo_bays'] - ($target_ship[metal] - $target_ship[fuel] - $target_ship['elect'] - $target_ship[colon] - $target_ship[organ]- $target_ship['scrap']);
 				$dead_cols = 0;
 				if($user_ship[colon] < 20) {
@@ -934,7 +934,7 @@ if($target > 0) {
 						$dead_cols = mt_rand(5,20);
 						$cash_given = round((($target_ship_bays * 10) / ($dead_cols / 2)) * 15);
 						$error_str .= "<p>Your Raid was a success. Though there where the inevitable casualties (<b>$dead_cols</b> colonists lost in all), you successfully looted the <b class=b1>$dead_ship[ship_name]</b> before it blew up.<br>The plunder gained you <b>$cash_given</b> Credits once it was sold on the Black Market.";
-						dbn("update ${db_name}_ships set colon = colon - $dead_cols where ship_id = $user[ship_id]");
+						dbn("update {$db_name}_ships set colon = colon - $dead_cols where ship_id = $user[ship_id]");
 						give_cash($cash_given);
 					} else {
 
@@ -968,8 +968,8 @@ if($target > 0) {
 				if($target['bounty'] > 0) {
 					$user_str .= "<p>You have claimed the <b>$target[bounty]</b> Credit bounty that was on <b class=b1>$target[login_name]</b>s head.";
 					post_news("The <b>$target[bounty]</b> bounty on <b class=b1>$target[login_name]</b> has been claimed by <b class=b1>$user[login_name]</b>");
-					dbn("update ${db_name}_users set cash = cash + $target[bounty] where login_id = '$user[login_id]'");
-					dbn("update ${db_name}_users set bounty = 0 where login_id = '$target[login_id]'");
+					dbn("update {$db_name}_users set cash = cash + $target[bounty] where login_id = '$user[login_id]'");
+					dbn("update {$db_name}_users set bounty = 0 where login_id = '$target[login_id]'");
 				}
 			} else { #otherwise they just lost another boring old ship
 				$short_str .= "<br><br>The <b class=b1>$target_ship[ship_name]</b> was destroyed in the attack.";
@@ -1003,8 +1003,8 @@ if($target > 0) {
 				if($user['bounty'] > 0) {
 					send_message($target['login_id'],"<p>You have claimed the <b>$user[bounty]</b> Credit bounty that was on <b class=b1>$user[login_name]s</b> head.");
 					post_news("The <b>$user[bounty]</b> bounty on <b class=b1>$user[login_name]</b> has been claimed by <b class=b1>$target[login_name]</b>");
-					dbn("update ${db_name}_users set cash = cash + $user[bounty] where login_id = '$target[login_id]'");
-					dbn("update ${db_name}_users set bounty = 0 where login_id = '$user[login_id]'");
+					dbn("update {$db_name}_users set cash = cash + $user[bounty] where login_id = '$target[login_id]'");
+					dbn("update {$db_name}_users set bounty = 0 where login_id = '$user[login_id]'");
 				}
 				#player looses their ship
 			} else {
@@ -1024,12 +1024,12 @@ if($target > 0) {
 }
 
 
-db("select attack_report from ${db_name}_user_options where login_id = '$target[login_id]'");
+db("select attack_report from {$db_name}_user_options where login_id = '$target[login_id]'");
 $target_options = dbr();
 
 
 #determine if the simple, or the complex report should be sent.
-if($target_options['attack_report'] == 1 || $target_ship['size'] < 4 || ereg("fr",$target_ship['config'])){
+if($target_options['attack_report'] == 1 || $target_ship['size'] < 4 || str_contains($target_ship['config'], 'fr')){
 	send_message($target['login_id'],addslashes($def_str.$short_str.$mess));
 } else {
 	send_message($target['login_id'],addslashes($def_str.$tech_str.$out_str3));
@@ -1037,7 +1037,7 @@ if($target_options['attack_report'] == 1 || $target_ship['size'] < 4 || ereg("fr
 
 
 // update user stats for status bar
-db("select * from ${db_name}_users where login_id = $user[login_id]");
+db("select * from {$db_name}_users where login_id = $user[login_id]");
 $user = dbr();
 $user_ship = userShip($user['ship_id']);
 

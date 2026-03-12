@@ -8,7 +8,7 @@ sudden_death_check($user);
 
 $error_str = "";
 
-db("select * from ${db_name}_bmrkt where location = '$user[location]' order by bmrkt_type asc");
+db("select * from {$db_name}_bmrkt where location = '$user[location]' order by bmrkt_type asc");
 $bmrkt = dbr();
 
 if (!isset($bmrkt)) {

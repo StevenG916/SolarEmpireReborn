@@ -16,7 +16,7 @@ if(isset($player_op) && $player_op == 1){
 	print_page("Change Player Information",$error_str);
 
 } elseif(isset($player_op) && $player_op == 2){
-	dbn("update ${db_name}_users set sig = '".addslashes($sig)."' where login_id = '$user[login_id]'");
+	dbn("update {$db_name}_users set sig = '".addslashes($sig)."' where login_id = '$user[login_id]'");
 	$error_str .= "User information updated.";
 }
 
@@ -37,7 +37,7 @@ if (isset($save_vars)) {
 		if($value < $option_check['option_min'] || $value > $option_check['option_max']){
 			$error_str .= "<br><b class=b1>$var</b> out of range.";
 		} else { #option in range
-			dbn("update ${db_name}_user_options set $var = '$value' where login_id = '$user[login_id]'");
+			dbn("update {$db_name}_user_options set $var = '$value' where login_id = '$user[login_id]'");
 			$user_options[$var] = $value;
 			$error_str .= "<br><b class=b1>$var</b> updated to <b>$value</b>";
 		}
@@ -53,41 +53,41 @@ if(isset($retire)) {
 		get_var("Retire","options.php","<p><b class=b1>Warning!</b> This will permanently remove your account from this game. <br>Are you sure you want to retire?".$retire_text_xtra,"sure","yes");
 	} else {
 		if ($user['clan_id'] > 0) {
-			db("select leader_id from ${db_name}_clans where clan_id = '$user[clan_id]'");
+			db("select leader_id from {$db_name}_clans where clan_id = '$user[clan_id]'");
 			$temp_1 = dbr();
-			db("select count(distinct login_id) from ${db_name}_users where clan_id = '$user[clan_id]' && login_id > 5");
+			db("select count(distinct login_id) from {$db_name}_users where clan_id = '$user[clan_id]' && login_id > 5");
 			$temp_2 = dbr();
 			$clan = array('members' => $temp_1[0], 'leader' => $temp_2[0]);
 			if($clan['members'] > 1 && $user['login_id'] == $clan['leader_id'] && !$what_to_do){
 				$new_page = "Before you retire you must first select whether you want your clan to be disbanded, or assign a new leader to it:";
 				$new_page .= "<form action=options.php method=POST name=retiring>";
-				while (list($var, $value) = each($HTTP_POST_VARS)) {
+				foreach ($_POST as $var => $value) {
 					$new_page .= "<input type=hidden name=$var value='$value'>";
 				}
 				$new_page .= "<p>Disband Clan <INPUT type=radio name=what_to_do value=1 CHECKED> / Assign New Clan Leader<INPUT type=radio name=what_to_do value=2><p><INPUT type=submit value='Submit'></form>";
 				print_page("Retiring",$new_page);
 			} elseif($clan['members'] < 2 || $what_to_do == 1){
-				dbn("update ${db_name}_users set clan_id = 0 where clan_id = $user[clan_id]");
-				dbn("update ${db_name}_planets set clan_id = -1 where clan_id = $user[clan_id]");
-				dbn("delete from ${db_name}_clans where clan_id = $user[clan_id]");
-				dbn("delete from ${db_name}_messages where clan_id = $user[clan_id]");
+				dbn("update {$db_name}_users set clan_id = 0 where clan_id = $user[clan_id]");
+				dbn("update {$db_name}_planets set clan_id = -1 where clan_id = $user[clan_id]");
+				dbn("delete from {$db_name}_clans where clan_id = $user[clan_id]");
+				dbn("delete from {$db_name}_messages where clan_id = $user[clan_id]");
 			} elseif($what_to_do == 2 && !$leader_id){
 				$new_page = "Please select which of the below you would like to be the new clan leader:";
 				$new_page .= "<form action=options.php method=POST name=retiring2>";
 				#$new_page .= "<input type=hidden name=what_to_do value='$what_to_do'>";
-				db2("select login_id,login_name from ${db_name}_users where clan_id = '$user[clan_id]' && login_id != '$user[login_id]'");
+				db2("select login_id,login_name from {$db_name}_users where clan_id = '$user[clan_id]' && login_id != '$user[login_id]'");
 				$new_page .= "<select name=leader_id>";
 				while ($member_name = dbr2()) {
 					$new_page .= "<option value=$member_name[login_id]>$member_name[login_name]</option>";
 				}
 				$new_page .= "</select>";
-				while (list($var, $value) = each($HTTP_POST_VARS)) {
+				foreach ($_POST as $var => $value) {
 					$new_page .= "<input type=hidden name=$var value='$value'>";
 				}
 				$new_page .= "<p><INPUT type=submit value='Submit'></form>";
 				print_page("Assign New Clan Leader",$new_page);
 			} else{
-					//dbn("update ${db_name}_clans set leader_id = $leader_id where clan_id = $user[clan_id]");
+					//dbn("update {$db_name}_clans set leader_id = $leader_id where clan_id = $user[clan_id]");
 			}
 		}
 		retire_user($user['login_id']);

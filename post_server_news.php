@@ -14,8 +14,8 @@ if ($sender != "" && $message != "") {
 	if ($file_contents = file ("server_news.inc.htm", r)){
 		$date = date("h:i - M d, Y",time());
 		$output_stuff = "\n\n<P><TABLE BORDER='1' BORDERCOLOR='#000000' CELLSPACING='0' CELLPADDING='5'><TR><TD BGCOLOR='#333333'><B CLASS='b1'>$sender</B> - $date</TD></TR><TR><TD BGCOLOR='#333333'>".stripslashes($message)."</TD></TR></TABLE>\n";
-		while ($line = each($file_contents)){
-			$output_stuff .= $line[1];
+		foreach ($file_contents as $line_value) {
+			$output_stuff .= $line_value;
 		}
 
 		$file_stream = fopen("server_news.inc.htm", "w+") or die("Unable to open file for writing");

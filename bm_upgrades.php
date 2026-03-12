@@ -14,7 +14,7 @@ if($from_0 == 1){
 $rs .= "<p><a href=location.php>Close Contact</a>";
 
 
-db("select * from ${db_name}_bmrkt where location = '$user[location]' && (bmrkt_type = 2 || bmrkt_type = 0) && bmrkt_id = '$bmrkt_id'");
+db("select * from {$db_name}_bmrkt where location = '$user[location]' && (bmrkt_type = 2 || bmrkt_type = 0) && bmrkt_id = '$bmrkt_id'");
 $bmrkt = dbr();
 
 if (!$bmrkt) {
@@ -25,7 +25,7 @@ if (!$bmrkt) {
 	print_page("Error","Admin in his/her near infinite wisdom has disabled the Blackmarket");
 }
 
-db("select config from ${db_name}_ships where ship_id = $user[ship_id]");
+db("select config from {$db_name}_ships where ship_id = $user[ship_id]");
 $old_config = dbr();
 
 // Tech and Credit costs of Advanced Upgrades
@@ -56,7 +56,7 @@ $max_ew = 5;
 $old_config = $user_ship[config];
 
 
-db("select upgrades from ${db_name}_ships where ship_id = $user[ship_id]");
+db("select upgrades from {$db_name}_ships where ship_id = $user[ship_id]");
 $upgrade_pods = dbr();
 
 // value of $buy determines upgrade to be purchased
@@ -79,11 +79,11 @@ if($buy ==3) { //Plasma Cannon
 		take_cash($plasma_cannon_c);
 		take_tech($plasma_cannon_t);
 
-		if (!eregi("pc",$old_config)){
+		if (!str_contains($old_config, 'pc')){
 			$user_ship[config] = $old_config.":pc";
 		}
 
-		dbn("update ${db_name}_ships set config = '$user_ship[config] ',upgrades = upgrades - 1,num_pc = num_pc + 1 where ship_id = '$user[ship_id]'");
+		dbn("update {$db_name}_ships set config = '$user_ship[config] ',upgrades = upgrades - 1,num_pc = num_pc + 1 where ship_id = '$user[ship_id]'");
 		$upgrade_pods[0] = $upgrade_pods[0] - 1;
 		$user_ship[num_pc]++;
 	}
@@ -104,11 +104,11 @@ if($buy ==3) { //Plasma Cannon
 		take_cash($silicon_armour_c);
 		take_tech($silicon_armour_t);
 
-		if (!eregi("sa",$old_config)){
+		if (!str_contains($old_config, 'sa')){
 			$user_ship[config] = $old_config.":sa";
 		}
 
-		dbn("update ${db_name}_ships set config = '$user_ship[config] ',upgrades = upgrades - 1, num_sa = num_sa + 1 where ship_id = '$user[ship_id]'");
+		dbn("update {$db_name}_ships set config = '$user_ship[config] ',upgrades = upgrades - 1, num_sa = num_sa + 1 where ship_id = '$user[ship_id]'");
 		$upgrade_pods[0] = $upgrade_pods[0] - 1;
 		$user_ship[num_sa]++;
 	}
@@ -130,10 +130,10 @@ if($buy ==3) { //Plasma Cannon
 		take_cash($electronic_warfare_c);
 		take_tech($electronic_warfare_t);
 
-		if (eregi("ew",$old_config)){
+		if (str_contains($old_config, 'ew')){
 			$user_ship[config] = $old_config.":ew";
 		}
-		dbn("update ${db_name}_ships set config = '$user_ship[config] ',upgrades = upgrades - 1, num_ew = num_ew + 1 where ship_id = '$user[ship_id]'");
+		dbn("update {$db_name}_ships set config = '$user_ship[config] ',upgrades = upgrades - 1, num_ew = num_ew + 1 where ship_id = '$user[ship_id]'");
 		$upgrade_pods[0] = $upgrade_pods[0] - 1;
 		$user_ship[num_ew]++;
 
@@ -151,7 +151,7 @@ if($buy ==3) { //Plasma Cannon
 		take_cash($genesis_c);
 		take_tech($genesis_t);
 		$user[genesis]++;
-		dbn("update ${db_name}_users set genesis = genesis + 1 where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set genesis = genesis + 1 where login_id = '$user[login_id]'");
 	}
 } elseif($buy ==8) { //Terra Imploder
 	if($user[cash] < $terra_i_c) {
@@ -165,7 +165,7 @@ if($buy ==3) { //Plasma Cannon
 		take_cash($terra_i_c);
 		take_tech($terra_i_t);
 		$user[terra_imploder]++;
-		dbn("update ${db_name}_users set terra_imploder = terra_imploder + 1 where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set terra_imploder = terra_imploder + 1 where login_id = '$user[login_id]'");
 	}
 }
 

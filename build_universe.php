@@ -111,12 +111,12 @@ if($user['login_id'] != ADMIN_ID && $user['login_id'] != OWNER_ID) { //(server) 
 			if($UNI['flag_research'] == 1){
 				print("Adding Blackmarkets...<br>");
 				add_blackmarket_se1($bmarks);
-				$bm_allowed = "${db_name}_bmrkt";
+				$bm_allowed = "{$db_name}_bmrkt";
 			} else {
 				$bm_allowed = "";
 			}
 			if (!isset($preview)) print("Saving Universe...<br>");
-			save_universe_se1($systems, $ports, $bmarks, "${db_name}_stars", "${db_name}_ports", $bm_allowed);
+			save_universe_se1($systems, $ports, $bmarks, "{$db_name}_stars", "{$db_name}_ports", $bm_allowed);
 			random_event_placer();
 
 			if (!isset($preview)) print("Creating pre-genned planets...<br>");
@@ -128,7 +128,7 @@ if($user['login_id'] != ADMIN_ID && $user['login_id'] != OWNER_ID) { //(server) 
 		} else {
 			set_time_limit(60); //another minute to make the images
 			if (!isset($preview)) print("<br>Deleting old images...<br>");
-			clearImages("img/${db_name}_maps");
+			clearImages("img/{$db_name}_maps");
 			if (!isset($preview)) print("Rendering global map...<br>");
 			render_global_se1($db_name);
 			if (!isset($preview)) print("Rendering local maps...<br>");
@@ -141,7 +141,7 @@ if($user['login_id'] != ADMIN_ID && $user['login_id'] != OWNER_ID) { //(server) 
 
 	} elseif(isset($gen_new_maps)){ //generating some new maps for some reason
 		if (!isset($preview)) print("<br>Deleting old images...<br>");
-		clearImages("img/${db_name}_maps");
+		clearImages("img/{$db_name}_maps");
 
 		if (!isset($preview)) print("Rendering global map...<br>");
 		render_global_se1($db_name);

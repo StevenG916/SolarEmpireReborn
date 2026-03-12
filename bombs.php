@@ -32,17 +32,17 @@ if($sn_effect) {
 	} elseif($star['event_random'] == 5 || $star['event_random'] == 10) {
 		print_page("No can Blow","This star is already fairly likely to Blow-up. <br>There's no point in using your SN Effector here.");
 	} elseif($star['star_id'] == 1) {
-		dbn("delete from ${db_name}_ships where ship_id = $user[ship_id] && ship_id != '1'");
-		db("select ship_id,location from ${db_name}_ships where login_id='$user[login_id]'");
+		dbn("delete from {$db_name}_ships where ship_id = $user[ship_id] && ship_id != '1'");
+		db("select ship_id,location from {$db_name}_ships where login_id='$user[login_id]'");
 		$n_s_1 = dbr();
 		if($n_s_1['ship_id']){
-			dbn("update ${db_name}_users set ship_id = '$n_s_1[ship_id]' && location = '$n_s_1[location]' where login_id='$user[login_id]'");
+			dbn("update {$db_name}_users set ship_id = '$n_s_1[ship_id]' && location = '$n_s_1[location]' where login_id='$user[login_id]'");
 			$user['ship_id'] = $n_s_1['ship_id'];
 			$user['location'] = $n_s_1['location'];
 		} elseif($user_ship['shipclass'] != 2) {
 			$user = create_escape_pod($user); //dump user into an EP
 		} else {
-			dbn("update ${db_name}_users set location = '1', ship_id = NULL where login_id = '$user[login_id]'");
+			dbn("update {$db_name}_users set location = '1', ship_id = NULL where login_id = '$user[login_id]'");
 			$user['location'] = 1;
 			$user['ship_id'] = NULL;
 		}
@@ -52,9 +52,9 @@ if($sn_effect) {
 		get_var('Use SuperNova Effector','bombs.php','Are you sure?','sure','');
 	} else {
 		if($user['login_id'] != ADMIN_ID){
-			dbn("update ${db_name}_users set sn_effect = 0 where login_id = " . $user['login_id']);
+			dbn("update {$db_name}_users set sn_effect = 0 where login_id = " . $user['login_id']);
 		}
-		dbn("update ${db_name}_stars set event_random = 10 where star_id = $user[location]");
+		dbn("update {$db_name}_stars set event_random = 10 where star_id = $user[location]");
 		post_news("<b class=b1>$user[login_name]</b> released a SuperNova Effector in star system #<b>$user_ship[location]</b>");
 		post_news('Due to the Release of a SuperNova Effector in system #<b>' .
 		 $user_ship[location] . '</b> by <b class=b1>' . $user[login_name] .
@@ -79,18 +79,18 @@ $planets = dbr();
 			get_var('Use Alpha Bomb','bombs.php','Are you sure you want to use an Alpha Bomb?','sure','');
 		} else {
 			if($user['login_id'] != ADMIN_ID){
-				dbn("update ${db_name}_users set alpha = alpha - 1 where login_id = $user[login_id]");
+				dbn("update {$db_name}_users set alpha = alpha - 1 where login_id = $user[login_id]");
 			}
 
 			post_news("<b class=b1>$user[login_name]</b> imploded a Alpha Bomb in system #$user_ship[location]");
 			get_star();
 
-			$lastresort = mysql_query("select s.ship_id,s.ship_name,s.login_id,s.class_name from ${db_name}_ships s, ${db_name}_users u where s.location = '$user[location]' && u.login_id != 1 && s.ship_id > 1 && s.login_id = u.login_id && u.turns_run > '$turns_safe'") or mysql_die("");
+			db("select s.ship_id,s.ship_name,s.login_id,s.class_name from {$db_name}_ships s, {$db_name}_users u where s.location = '$user[location]' && u.login_id != 1 && s.ship_id > 1 && s.login_id = u.login_id && u.turns_run > '$turns_safe'");
 
 			$ship_counter = 0;
 			$victims = array();
-			while($target_ship = mysql_fetch_array($lastresort)) {
-				dbn("update ${db_name}_ships set shields = 0 where ship_id = '$target_ship[ship_id]'");
+			while($target_ship = dbr(1)) {
+				dbn("update {$db_name}_ships set shields = 0 where ship_id = '$target_ship[ship_id]'");
 				$ship_counter++;
 				$victims[$target_ship['login_id']] .= "\n<br><b class=b1>$target_ship[ship_name]</b> ($target_ship[class_name])";
 			}
@@ -110,9 +110,9 @@ $planets = dbr();
 
 		}
 
-		db("select * from ${db_name}_users where login_id = '$login_id'");
+		db("select * from {$db_name}_users where login_id = '$login_id'");
 		$user = dbr(1);
-		db("select * from ${db_name}_ships where ship_id = '$user[ship_id]'");
+		db("select * from {$db_name}_ships where ship_id = '$user[ship_id]'");
 		$user_ship = dbr(1);
 		empty_bays($user_ship);
 	} else {
@@ -151,7 +151,7 @@ if (empty($planets) || $user['login_id'] == ADMIN_ID) {
 	} else {
 
 		if($user['login_id'] != ADMIN_ID){
-			dbn("update ${db_name}_users set ${b_text} = ${b_text} - 1 where login_id = $user[login_id]");
+			dbn("update {$db_name}_users set {$b_text} = {$b_text} - 1 where login_id = $user[login_id]");
 		}
 
 		post_news("<b class=b1>$user[login_name]</b> unleashed a $b_text Bomb in star system #<b>$user_ship[location]</b>");
@@ -161,10 +161,10 @@ if (empty($planets) || $user['login_id'] == ADMIN_ID) {
 			$bomb_damage = 200;
 		} elseif ($bomb_type==2) { #delta bomb
 			#clear all shields on all ships before we start.
-			db("select s.ship_id from ${db_name}_ships s, ${db_name}_users u where s.location = '$user[location]' && u.login_id	!= 1 && s.ship_id > 1 && s.login_id = u.login_id && u.turns_run > '$turns_safe'");
+			db("select s.ship_id from {$db_name}_ships s, {$db_name}_users u where s.location = '$user[location]' && u.login_id	!= 1 && s.ship_id > 1 && s.login_id = u.login_id && u.turns_run > '$turns_safe'");
 
 			while($target_ship = dbr(1)){
-				dbn("update ${db_name}_ships set shields = 0 where ship_id = '$target_ship[ship_id]'");
+				dbn("update {$db_name}_ships set shields = 0 where ship_id = '$target_ship[ship_id]'");
 			}
 			$target_ship = "";
 
@@ -179,13 +179,13 @@ if (empty($planets) || $user['login_id'] == ADMIN_ID) {
 		$dam_victim = array();
 		$destroyed_ships = 0;
 
-		$lastresort = mysql_query("select s.fighters,s.shields,s.ship_id,s.metal,s.fuel,s.location,s.login_id,s.class_name,s.ship_name,s.point_value,u.login_name, s.num_sa as num_sa from ${db_name}_ships s,${db_name}_users u where s.location = '$user[location]' && s.ship_id > '1' && s.login_id >'1' && s.login_id = u.login_id && u.turns_run >= '$turns_safe'") or mysql_die("Bombs are messed up.");
+		db("select s.fighters,s.shields,s.ship_id,s.metal,s.fuel,s.location,s.login_id,s.class_name,s.ship_name,s.point_value,u.login_name, s.num_sa as num_sa from {$db_name}_ships s,{$db_name}_users u where s.location = '$user[location]' && s.ship_id > '1' && s.login_id >'1' && s.login_id = u.login_id && u.turns_run >= '$turns_safe'");
 
 		$elim = 0;
 
 		#loop through players to damage.
-		while($target_ship = mysql_fetch_array($lastresort)) {
-			#db("select login_name,login_id,ship_id from ${db_name}_users where login_id = '$target_ship[login_id]'");
+		while($target_ship = dbr(1)) {
+			#db("select login_name,login_id,ship_id from {$db_name}_users where login_id = '$target_ship[login_id]'");
 			#$target = dbr();
 
 
@@ -228,9 +228,9 @@ if (empty($planets) || $user['login_id'] == ADMIN_ID) {
 		$error_str .= "<p><b class=b2>kaaaaBBBBBBOOOOOOOOOOOOOOOOOOOOOOOOOOOOOMMMMMMMMM!!!!!!!</b>";
 	}
 
-	db("select * from ${db_name}_users where login_id = '$user[login_id]'");
+	db("select * from {$db_name}_users where login_id = '$user[login_id]'");
 	$user = dbr(1);
-	db("select * from ${db_name}_ships where ship_id = '$user[ship_id]'");
+	db("select * from {$db_name}_ships where ship_id = '$user[ship_id]'");
 	$user_ship = dbr(1);
 	empty_bays($user_ship);
 } else {

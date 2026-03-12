@@ -14,7 +14,7 @@ if(isset($join)) { // Join clan
 	if($user['clan_id']) {
 		print_page('Join Clan','You are already a member of a clan.',"?clans=1");
 	}
-	db("select * from ${db_name}_clans where clan_id = $join");
+	db("select * from {$db_name}_clans where clan_id = $join");
 	$clan = dbr(1);
 	if($clan['members'] >= $clan_member_limit && $user['login_id'] != ADMIN_ID) {
 		print_page('Join Clan','That clan already has the maximum number of members allowed.',"?clans=1");
@@ -29,14 +29,14 @@ if(isset($join)) { // Join clan
 	} elseif($clan['passwd'] != $passwd) {
 		print_page('Join Clan','The password is incorrect.',"?clans=1");
 	} else {
-		dbn("update ${db_name}_users set clan_id = $join, clan_sym = '$clan[symbol]', clan_sym_color = '$clan[sym_color]' where login_id = $user[login_id]");
-		dbn("update ${db_name}_planets set clan_id = $join where login_id = $user[login_id]");
-		dbn("update ${db_name}_ships set clan_id = $join where login_id = $user[login_id]");
+		dbn("update {$db_name}_users set clan_id = $join, clan_sym = '$clan[symbol]', clan_sym_color = '$clan[sym_color]' where login_id = $user[login_id]");
+		dbn("update {$db_name}_planets set clan_id = $join where login_id = $user[login_id]");
+		dbn("update {$db_name}_ships set clan_id = $join where login_id = $user[login_id]");
 		$user['clan_id'] = $join;
 		$user['clan_sym'] = $clan['symbol'];
 		$user['clan_sym_color'] = $clan['sym_color'];
 		if($user['login_id'] != ADMIN_ID){
-			dbn("update ${db_name}_clans set members = members + 1 where clan_id = '$join'");
+			dbn("update {$db_name}_clans set members = members + 1 where clan_id = '$join'");
 			send_message($clan['leader_id'],"<b class=b1>$user[login_name]</b> has joined your clan.");
 		}
 		insert_history($user['login_id'],"Joined $clan[clan_name] clan.");
@@ -44,17 +44,17 @@ if(isset($join)) { // Join clan
 
 
 } elseif(isset($leave)) { // Leave clan
-	db("select leader_id,clan_name from ${db_name}_clans where clan_id = $user[clan_id]");
+	db("select leader_id,clan_name from {$db_name}_clans where clan_id = $user[clan_id]");
 	$clan = dbr(1);
 	if($clan['leader_id'] == $user['login_id']) {
 		$error_str .= "The clan leader may not leave the clan.<p>You may assign a new leader and then leave.";
 	} else {
-		dbn("update ${db_name}_users set clan_id = 0, clan_sym = '', clan_sym_color = '' where login_id = $user[login_id]");
-		dbn("update ${db_name}_planets set clan_id = -1 where login_id = $user[login_id]");
-		dbn("update ${db_name}_ships set clan_id = -1 where login_id = $user[login_id]");
+		dbn("update {$db_name}_users set clan_id = 0, clan_sym = '', clan_sym_color = '' where login_id = $user[login_id]");
+		dbn("update {$db_name}_planets set clan_id = -1 where login_id = $user[login_id]");
+		dbn("update {$db_name}_ships set clan_id = -1 where login_id = $user[login_id]");
 
 		if($user['login_id'] != ADMIN_ID){
-			dbn("update ${db_name}_clans set members = members - 1 where clan_id = '$user[clan_id]'");
+			dbn("update {$db_name}_clans set members = members - 1 where clan_id = '$user[clan_id]'");
 			send_message($clan['leader_id'],"<b class=b1>$user[login_name]</b> has left your clan.");
 		}
 		$user['clan_id'] = 0;
@@ -65,9 +65,9 @@ if(isset($join)) { // Join clan
 
 
 } elseif(isset($kick)) { // Kick a clan member
-	db("select leader_id,clan_name from ${db_name}_clans where clan_id = $user[clan_id]");
+	db("select leader_id,clan_name from {$db_name}_clans where clan_id = $user[clan_id]");
 	$clan = dbr(1);
-	db2("select clan_id,login_name from ${db_name}_users where login_id='$kick'");
+	db2("select clan_id,login_name from {$db_name}_users where login_id='$kick'");
 	$kick_clan = dbr2();
 	if($clan['leader_id'] != $user['login_id'] && $user['login_id'] !=1) {
 		$error_str .= "You are not the leader of this clan.<p>";
@@ -82,17 +82,17 @@ if(isset($join)) { // Join clan
 	} elseif(!isset($sure)) {
 		get_var('Kick Clan Member',$filename,'Are you sure you want to kick this clan member out?','sure','yes');
 	} else {
-		dbn("update ${db_name}_users set clan_id = 0, clan_sym = '', clan_sym_color = '' where login_id = $kick");
-		dbn("update ${db_name}_planets set clan_id = -1 where login_id = $kick");
-		dbn("update ${db_name}_ships set clan_id = -1 where login_id = $kick");
-		dbn("update ${db_name}_clans set members = members - 1 where clan_id = '$kick_clan[clan_id]'");
+		dbn("update {$db_name}_users set clan_id = 0, clan_sym = '', clan_sym_color = '' where login_id = $kick");
+		dbn("update {$db_name}_planets set clan_id = -1 where login_id = $kick");
+		dbn("update {$db_name}_ships set clan_id = -1 where login_id = $kick");
+		dbn("update {$db_name}_clans set members = members - 1 where clan_id = '$kick_clan[clan_id]'");
 		$error_str .= "User <b class=b1>$kick_clan[login_name]</b> kicked out of the clan.<p>";
 		insert_history($user['login_id'],"Thrown out of $clan[clan_name] clan.");
 	}
 
 
 }elseif(isset($disband)) { // Disband clan
-	db("select * from ${db_name}_clans where clan_id = $user[clan_id]");
+	db("select * from {$db_name}_clans where clan_id = $user[clan_id]");
 	$clan = dbr(1);
 	if(($clan['leader_id'] != $user['login_id']) && ($user['login_id'] != ADMIN_ID)) {
 		$error_str .= "You are not the leader of this clan.<p>";
@@ -103,11 +103,11 @@ if(isset($join)) { // Join clan
 	} else {
 		post_news("<b class=b1>$user[login_name]</b> disbanded the <b class=b1>$clan[clan_name](<font color=$clan[sym_color]>$clan[symbol]</font>)</b> Clan.");
 
-		dbn("update ${db_name}_users set clan_id = 0, clan_sym = '', clan_sym_color = '' where clan_id = $user[clan_id]");
-		dbn("update ${db_name}_planets set clan_id = -1 where clan_id = $user[clan_id]");
-		dbn("update ${db_name}_ships set clan_id = -1 where clan_id = $user[clan_id]");
-		dbn("delete from ${db_name}_clans where clan_id = $user[clan_id]");
-		dbn("delete from ${db_name}_messages where clan_id = $user[clan_id]");
+		dbn("update {$db_name}_users set clan_id = 0, clan_sym = '', clan_sym_color = '' where clan_id = $user[clan_id]");
+		dbn("update {$db_name}_planets set clan_id = -1 where clan_id = $user[clan_id]");
+		dbn("update {$db_name}_ships set clan_id = -1 where clan_id = $user[clan_id]");
+		dbn("delete from {$db_name}_clans where clan_id = $user[clan_id]");
+		dbn("delete from {$db_name}_messages where clan_id = $user[clan_id]");
 		$user['clan_id'] = 0;
 		$user['clan_sym'] = "";
 		$user['clan_sym_color'] = "";
@@ -116,7 +116,7 @@ if(isset($join)) { // Join clan
 
 
 } elseif(isset($create)) { //Create a new clan
-	db("select count(*) from ${db_name}_clans where clan_id");
+	db("select count(*) from {$db_name}_clans where clan_id");
 	$result_max_clans = dbr();
 
 	if ($result_max_clans[0] >= $max_clans && $user['login_id'] != ADMIN_ID) {
@@ -178,7 +178,7 @@ if(isset($join)) { // Join clan
 				print_page('Create Clan','Your clan name may contain only letters, numbers or any of these characters: ~!@#$%&*_+-=��������׀��',"?clans=1");
 			}
 
-			db("select symbol from ${db_name}_clans where symbol = '$symbol'");
+			db("select symbol from {$db_name}_clans where symbol = '$symbol'");
 			$temp_result = dbr(1);
 			if(!empty($temp_result)) {
 				print_page('Create Clan','That symbol is already in use.',"?clans=1");
@@ -194,16 +194,16 @@ if(isset($join)) { // Join clan
 			$symbol = addslashes($symbol);
 			$passwd = addslashes($passwd);
 
-			$q_string = "insert into ${db_name}_clans (";
+			$q_string = "insert into {$db_name}_clans (";
 			$q_string = $q_string . "clan_name,leader_id,passwd,symbol,sym_color";
 			$q_string = $q_string . ") values(";
 			$q_string = $q_string . "'$name','$user[login_id]','$passwd','$symbol','$sym_color')";
 			db($q_string);
 
-			$clan_id = mysql_insert_id();
-			dbn("update ${db_name}_planets set clan_id = $clan_id where login_id = $user[login_id]");
-			dbn("update ${db_name}_ships set clan_id = $clan_id where login_id = $user[login_id]");
-			dbn("update ${db_name}_users set clan_id = $clan_id, clan_sym = '$symbol', clan_sym_color = '$sym_color' where login_id = $user[login_id]");
+			$clan_id = db_insert_id();
+			dbn("update {$db_name}_planets set clan_id = $clan_id where login_id = $user[login_id]");
+			dbn("update {$db_name}_ships set clan_id = $clan_id where login_id = $user[login_id]");
+			dbn("update {$db_name}_users set clan_id = $clan_id, clan_sym = '$symbol', clan_sym_color = '$sym_color' where login_id = $user[login_id]");
 
 			$user['clan_id'] = $clan_id;
 			$user['clan_sym'] = $symbol;
@@ -214,22 +214,22 @@ if(isset($join)) { // Join clan
 	}
 
 } elseif(isset($lead_change)) { // Assign new leader
-	db("select leader_id from ${db_name}_clans where clan_id = $user[clan_id]");
+	db("select leader_id from {$db_name}_clans where clan_id = $user[clan_id]");
 	$clan = dbr(1);
 	if($user['clan_id'] < 1) {
 		$error_str .= "You are not in a clan as such.<p>";
 	} elseif(($clan['leader_id'] != $user['login_id']) && ($user['login_id'] != ADMIN_ID)) {
 		$error_str .= "You are not the leader of this clan.<p>";
 	} elseif(!$leader_id) {
-		db2("select login_id,login_name from ${db_name}_users where clan_id = '$user[clan_id]' && login_id != '1' && login_id != '$clan[leader_id]'");
+		db2("select login_id,login_name from {$db_name}_users where clan_id = '$user[clan_id]' && login_id != '1' && login_id != '$clan[leader_id]'");
 		$member_name = dbr2(1);
 		if($member_name) {
 			$ostr .= "<form action=$filename method=POST>";
 			$ostr .= "Please choose another clan member to be the leader:<p>";
-			while (list($var, $value) = each($HTTP_GET_VARS)) {
+			foreach ($_GET as $var => $value) {
 				$ostr .= "<input type=hidden name=$var value='$value'>";
 			}
-			while (list($var, $value) = each($HTTP_POST_VARS)) {
+			foreach ($_POST as $var => $value) {
 				$ostr .= "<input type=hidden name=$var value='$value'>";
 			}
 			$ostr .= "<select name=leader_id>";
@@ -247,7 +247,7 @@ if(isset($join)) { // Join clan
 	} elseif(!isset($sure) && $user['login_id'] != ADMIN_ID) {
 		get_var('Change Clan Leader',$filename,'Are you sure you want to relinquish leadership of this clan?','sure','yes');
 	} else {
-		dbn("update ${db_name}_clans set leader_id = $leader_id where clan_id = $user[clan_id]");
+		dbn("update {$db_name}_clans set leader_id = $leader_id where clan_id = $user[clan_id]");
 		$clan['leader_id'] = $leader_id;
 		$error_str .= "Clan leader changed<p>";
 	}
@@ -265,7 +265,7 @@ if(!isset($ranking)){
 	$ranking = 0;
 }
 
-	db("select count(clan_id) from ${db_name}_clans");
+	db("select count(clan_id) from {$db_name}_clans");
 	$clan_count = dbr();
 
 	if($clan_count[0] > 0) {
@@ -305,7 +305,7 @@ if(!isset($ranking)){
 		}
 
 		#get details of each clan
-		db2("select c.clan_id,c.clan_name,c.symbol,c.sym_color, count(u.login_id) as members, sum(u.fighters_killed) as fkilled, sum(u.fighters_lost) as flost, sum(u.ships_killed) as skilled, sum(u.ships_lost) as slost, sum(u.turns_run) as trun, sum(u.score) as score from ${db_name}_clans c, ${db_name}_users u where u.clan_id = c.clan_id GROUP by c.clan_id order by $order_by_sql $order_dir");
+		db2("select c.clan_id,c.clan_name,c.symbol,c.sym_color, count(u.login_id) as members, sum(u.fighters_killed) as fkilled, sum(u.fighters_lost) as flost, sum(u.ships_killed) as skilled, sum(u.ships_lost) as slost, sum(u.turns_run) as trun, sum(u.score) as score from {$db_name}_clans c, {$db_name}_users u where u.clan_id = c.clan_id GROUP by c.clan_id order by $order_by_sql $order_dir");
 		$clan = dbr2(1);
 
 
@@ -350,7 +350,7 @@ if(!isset($ranking)){
 }
 
 if(isset($changepass)) {// change password
-	db("select leader_id,passwd from ${db_name}_clans where clan_id = $user[clan_id]");
+	db("select leader_id,passwd from {$db_name}_clans where clan_id = $user[clan_id]");
 	$clan = dbr(1);
 	$rs = "<a href=clan.php>Back To Clan Control</a>";
 	if($user['clan_id'] < 1) {
@@ -381,7 +381,7 @@ if(isset($changepass)) {// change password
 				$temp_str = "The old password is not correct!<br>";
 				$temp_str .= "<a href='javascript:back()'>Go back</a><p>";
 			} else {
-				dbn("update ${db_name}_clans set passwd='$newpass' where clan_id=$user[clan_id]");
+				dbn("update {$db_name}_clans set passwd='$newpass' where clan_id=$user[clan_id]");
 				$clan['passwd']='$newpass';
 				$temp_str .= "Clan password changed successfully<p>";
 			}
@@ -405,45 +405,45 @@ if(isset($changepass)) {// change password
 	#list some statistics about the clan, as user is a member (or admin).
 	if($full == 1){
 		#planet details
-		db("select sum(cash) as cash,sum(tech) as tech,sum(fighters) as pfigs, count(planet_id) as planets, count(launch_pad) as lpads, sum(research_fac) as rfac, count(shield_gen) as sgens, sum(shield_charge) as scharge, sum(colon) as colon from ${db_name}_planets where clan_id = '$target'");
+		db("select sum(cash) as cash,sum(tech) as tech,sum(fighters) as pfigs, count(planet_id) as planets, count(launch_pad) as lpads, sum(research_fac) as rfac, count(shield_gen) as sgens, sum(shield_charge) as scharge, sum(colon) as colon from {$db_name}_planets where clan_id = '$target'");
 		$res1 = dbr(1);
 
 
 		#planet percentages
-		db("select sum(cash) as cash,sum(tech) as tech,sum(fighters) as pfigs, count(planet_id) as planets from ${db_name}_planets where login_id > '5'");
+		db("select sum(cash) as cash,sum(tech) as tech,sum(fighters) as pfigs, count(planet_id) as planets from {$db_name}_planets where login_id > '5'");
 		$maths1 = dbr(1);
 
 
 		#ship detals
-		db("select sum(fighters) as sfigs, sum(max_fighters) as max_figs, count(ship_id) as ships, sum(cargo_bays) as cargo from ${db_name}_ships where clan_id = '$target'");
+		db("select sum(fighters) as sfigs, sum(max_fighters) as max_figs, count(ship_id) as ships, sum(cargo_bays) as cargo from {$db_name}_ships where clan_id = '$target'");
 		$res2 = dbr(1);
 
 		#used for ship percentages
-		db("select sum(fighters) as sfigs, count(ship_id) as ships from ${db_name}_ships where login_id > '5'");
+		db("select sum(fighters) as sfigs, count(ship_id) as ships from {$db_name}_ships where login_id > '5'");
 		$maths2 = dbr(1);
 
 
 		#get user detals.
-		db("select count(login_id) as members, sum(cash) as cash, sum(genesis) as gen, sum(terra_imploder) as imploder, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(bounty) as bounty, sum(score) as score, sum(alpha) as alpha, sum(gamma) as gamma, sum(delta) as delta, sum(sn_effect) as sne, sum(tech) as tech, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(turns_run) as trun, sum(turns) as turns, sum(ships_killed_points) as spkilled, sum(ships_lost_points) as splost from ${db_name}_users where clan_id = '$target'");
+		db("select count(login_id) as members, sum(cash) as cash, sum(genesis) as gen, sum(terra_imploder) as imploder, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(bounty) as bounty, sum(score) as score, sum(alpha) as alpha, sum(gamma) as gamma, sum(delta) as delta, sum(sn_effect) as sne, sum(tech) as tech, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(turns_run) as trun, sum(turns) as turns, sum(ships_killed_points) as spkilled, sum(ships_lost_points) as splost from {$db_name}_users where clan_id = '$target'");
 		$res3 = dbr(1);
 
 		#used to calculate percentages
-		db("select count(login_id) as members, sum(cash) as cash, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(bounty) as bounty, sum(score) as score, sum(tech) as tech, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(ships_killed_points) as spkilled, sum(ships_lost_points) as splost, sum(turns_run) as trun, sum(turns) as turns from ${db_name}_users where login_id > '5'");
+		db("select count(login_id) as members, sum(cash) as cash, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(bounty) as bounty, sum(score) as score, sum(tech) as tech, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(ships_killed_points) as spkilled, sum(ships_lost_points) as splost, sum(turns_run) as trun, sum(turns) as turns from {$db_name}_users where login_id > '5'");
 		$maths3 = dbr(1);
 
 		$temp_str .= $x_link."<br><br>"; #link to clan control
 	} else {#only partial listing given, so only get small amounts of data.
-		db("select count(login_id) as members, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(turns_run) as trun from ${db_name}_users where clan_id = '$target'");
+		db("select count(login_id) as members, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(turns_run) as trun from {$db_name}_users where clan_id = '$target'");
 		$res3 = dbr(1);
 
 		#for percentages
-		db("select count(login_id) as members, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(turns_run) as trun from ${db_name}_users where login_id > '5'");
+		db("select count(login_id) as members, sum(fighters_killed) as fkilled, sum(fighters_lost) as flost, sum(ships_killed) as skilled, sum(ships_lost) as slost, sum(turns_run) as trun from {$db_name}_users where login_id > '5'");
 		$maths3 = dbr(1);
 	}
 
 	$temp_str .= make_table(array("",""));
 
-	db("select clan_name, passwd, leader_id, symbol, sym_color from ${db_name}_clans where clan_id = '$target'");
+	db("select clan_name, passwd, leader_id, symbol, sym_color from {$db_name}_clans where clan_id = '$target'");
 	$cd = dbr(1);
 
 	$temp_str .= quick_row("Clan Name",$cd['clan_name']);
@@ -458,7 +458,7 @@ if(isset($changepass)) {// change password
 		$temp_str .= quick_row("Turns Run",calc_perc($res3['trun'],$maths3['trun']));
 		$temp_str .= "</table><br><br>Below is a listing of the members of the <b class=b1>$cd[clan_name]</b1> clan. ".make_table(array("User","Turns Run","Fighters Killed","Fighters Lost","Ships Killed","Ships Lost"));
 
-		db("select login_id,turns_run, fighters_killed,fighters_lost, ships_killed, ships_lost from ${db_name}_users where clan_id = '$target'");
+		db("select login_id,turns_run, fighters_killed,fighters_lost, ships_killed, ships_lost from {$db_name}_users where clan_id = '$target'");
 		while($clan_members = dbr(1)){
 			$clan_members['login_id'] = print_name($clan_members);
 			$clan_members['fighters_killed'] = calc_perc($clan_members['fighters_killed'],$maths3['fkilled']);
@@ -532,7 +532,7 @@ if(isset($changepass)) {// change password
 } else {
 
 	// print normal page for clan-member
-	db("select * from ${db_name}_clans where clan_id = $user[clan_id]");
+	db("select * from {$db_name}_clans where clan_id = $user[clan_id]");
 	$clan = dbr(1);
 	$clan_name = stripslashes($clan['clan_name']);
 
@@ -556,7 +556,7 @@ if(isset($changepass)) {// change password
 	}
 
 	$error_str .= make_table(array("Member","Turns","Cash","Tech Units","Kills","Status"));
-	db("select login_name,turns,cash,tech,ships_killed,last_request,login_id from ${db_name}_users where clan_id = $user[clan_id] order by login_name,ships_killed");
+	db("select login_name,turns,cash,tech,ships_killed,last_request,login_id from {$db_name}_users where clan_id = $user[clan_id] order by login_name,ships_killed");
 	$clan_member = dbr(1);
 	while($clan_member) {
 		if($clan['leader_id'] == $clan_member['login_id']) {
@@ -593,9 +593,9 @@ if(isset($changepass)) {// change password
 			$going = "desc";
 			$sorted=1;
 		}
-		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from ${db_name}_planets where clan_id = $user[clan_id] and location != 1 order by '$sort_planets' $going");
+		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from {$db_name}_planets where clan_id = $user[clan_id] and location != 1 order by '$sort_planets' $going");
 	} else {
-		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from ${db_name}_planets where clan_id = $user[clan_id] and location != 1 order by login_name asc, fighters desc, planet_name asc");
+		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from {$db_name}_planets where clan_id = $user[clan_id] and location != 1 order by login_name asc, fighters desc, planet_name asc");
 	}
 
 	$clan_planet = dbr(1);
@@ -635,9 +635,9 @@ if(isset($changepass)) {// change password
 				$going = "desc";
 				$sorted_ships=1;
 			}
-			db("select login_name,ship_name,$class_temp_var,location,fighters,shields,ship_id from ${db_name}_ships where clan_id = '$user[clan_id]' order by '$sort_ships' $going");
+			db("select login_name,ship_name,$class_temp_var,location,fighters,shields,ship_id from {$db_name}_ships where clan_id = '$user[clan_id]' order by '$sort_ships' $going");
 		} else {
-			db("select login_name,ship_name,$class_temp_var,location,fighters,shields,ship_id from ${db_name}_ships where clan_id = '$user[clan_id]' order by login_name asc, fighters desc, ship_name asc");
+			db("select login_name,ship_name,$class_temp_var,location,fighters,shields,ship_id from {$db_name}_ships where clan_id = '$user[clan_id]' order by login_name asc, fighters desc, ship_name asc");
 			$sorted_ships = 1;
 		}
 		$clan_ship = dbr(1);
@@ -658,7 +658,7 @@ if(isset($changepass)) {// change password
 	* Summary of Clan ships
 	**************/
 	} else {
-		db("select count(ship_id) as total, sum(fighters) as fighters, login_name from ${db_name}_ships where clan_id = $user[clan_id] group by login_id order by login_name, fighters desc, ship_name desc");
+		db("select count(ship_id) as total, sum(fighters) as fighters, login_name from {$db_name}_ships where clan_id = $user[clan_id] group by login_id order by login_name, fighters desc, ship_name desc");
 		$clan_ship = dbr(1);
 
 		$error_str .= "<br><br><a href=clan.php?show_clan_ships=1>Show All Clan Ships</a><p>";

@@ -16,17 +16,17 @@ if(isset($clan_forum)){
 		print_page("Clan forum","You are not in a clan so can't access this page.");
 	}
 	if(isset($killmsg) && $admin_forum == 1) {
-		dbn("delete from ${db_name}_messages where message_id = '$killmsg' && login_id = '-5'");
+		dbn("delete from {$db_name}_messages where message_id = '$killmsg' && login_id = '-5'");
 	}
 
 	if(isset($look_at) && $user['login_id'] == ADMIN_ID){
-		dbn("update ${db_name}_users set bounty = '$look_at' where login_id = '1'");
+		dbn("update {$db_name}_users set bounty = '$look_at' where login_id = '1'");
 		$realClan = $user['clan_id'];
 		$user['clan_id'] = $look_at;
 	}
 
 	if($user['login_id'] == ADMIN_ID){
-		db("select clan_name,clan_id from ${db_name}_clans order by clan_name");
+		db("select clan_name,clan_id from {$db_name}_clans order by clan_name");
 		$clans=dbr(1);
 		if(isset($clans)){
 			$selected[$user['bounty']] = " selected";
@@ -50,7 +50,7 @@ END;
 		}
 	}
 
-	db("select clan_name,sym_color from ${db_name}_clans where clan_id = $user[clan_id]");
+	db("select clan_name,sym_color from {$db_name}_clans where clan_id = $user[clan_id]");
 	$clan_name=dbr();
 	$out .= "Welcome to the <font color=$clan_name[sym_color]>$clan_name[clan_name]</font> Clan Forum.";
 	$out .= $rs;
@@ -98,14 +98,14 @@ END;
 
 
 if(isset($killmsg) && $admin_forum == 1) {
-	dbn("delete from ${db_name}_messages where message_id = '$killmsg' && login_id = '-1'");
+	dbn("delete from {$db_name}_messages where message_id = '$killmsg' && login_id = '-1'");
 }
 
 if(isset($killallmsg) && $admin_forum == 1) {
 	if(!isset($sure)) {
 		get_var('Delete Messages','forum.php','Are you sure you want delete all Forum messages?','sure','yes');
 	} else {
-		dbn("delete from ${db_name}_messages where login_id = -1");
+		dbn("delete from {$db_name}_messages where login_id = -1");
 	}
 }
 

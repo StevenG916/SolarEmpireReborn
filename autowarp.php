@@ -10,8 +10,8 @@ if(!isset($dest_sector)) {
 
 $stars = $visit = $pred = $dist = array();
 
-$starList = mysql_query("SELECT `star_id`, `link_1`, `link_2`, `link_3`, `link_4`, `link_5`, `link_6` FROM `{$db_name}_stars`");
-while ($each = mysql_fetch_row($starList)) {
+db("SELECT `star_id`, `link_1`, `link_2`, `link_3`, `link_4`, `link_5`, `link_6` FROM `{$db_name}_stars`");
+while ($each = dbr(0)) {
 	$stars[(int)$each[0]] = array(
 		(int)$each[1],
 		(int)$each[2],

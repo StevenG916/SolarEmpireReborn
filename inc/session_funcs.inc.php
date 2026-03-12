@@ -28,7 +28,7 @@ function login_to_server()
 
 			insert_history(1, "Successfully logged in.");
 
-			dbn("update ${db_name}_users set game_login_count = game_login_count + 1 where login_id = '1'");
+			dbn("update {$db_name}_users set game_login_count = game_login_count + 1 where login_id = '1'");
 			dbn("update se_games set session_id = '$session', session_exp = '$expire' where db_name = '$db_name'");
 
 			header('Location: location.php');

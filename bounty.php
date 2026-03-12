@@ -27,7 +27,7 @@ if(isset($amount)) {
 		$amount = round(($amount /100) * $commission) + $amount;
 	}
 
-	db("select clan_id from ${db_name}_users where login_id = '$target'");
+	db("select clan_id from {$db_name}_users where login_id = '$target'");
 	$todo = dbr();
 
 	if($amount > $user['cash']) {
@@ -45,11 +45,11 @@ if(isset($amount)) {
 	} elseif (!$initial) {
 		print_page("Bounty","You didn't state an amount to place on $targets head.");
 	} else {
-		dbn("update ${db_name}_users set bounty = bounty + '$initial' where login_id = '$target'");
+		dbn("update {$db_name}_users set bounty = bounty + '$initial' where login_id = '$target'");
 		take_cash($amount);
-		db("select bounty,login_name from ${db_name}_users where login_id = '$target'");
+		db("select bounty,login_name from {$db_name}_users where login_id = '$target'");
 		$returned = dbr();
-		dbn("insert into ${db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values(".time().",'Bobs Charity Shop','$target','$target','Someone has put <b>$initial</b> on your head, making your bounty <b>$returned[0]</b> Credits.')");
+		dbn("insert into {$db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values(".time().",'Bobs Charity Shop','$target','$target','Someone has put <b>$initial</b> on your head, making your bounty <b>$returned[0]</b> Credits.')");
 		if ($returned[0] > $amount) {
 			$text .= "You have added <b>$initial</b> Credits to <b class=b1>$returned[1]'s</b> bounty, making the present bounty <b>$returned[0]</b>. You were charged <b>$amount</b> Credit(s) for the transaction.<p>";
 		} else {
@@ -60,7 +60,7 @@ if(isset($amount)) {
 				$text .= "You do not have enough turns to add the message, but rest assured, the bounty has been added non-the-less.";
 			} else {
 				charge_turns(1);
-				dbn("insert into ${db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values(".time().",'Bobs Charity Shop','$target','$target','The bounty also came with a message:<p> $bount_mess')");
+				dbn("insert into {$db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values(".time().",'Bobs Charity Shop','$target','$target','The bounty also came with a message:<p> $bount_mess')");
 				$text .= "<br>You have also been charged 1 turn for the additional message.";
 			}
 		}
@@ -74,7 +74,7 @@ if($payoff < 0) {
 		print_page("Bounty","You have no money. how do you expect to pay off a bounty?");
 	} else {
 
-	db("select login_name,login_id,bounty from ${db_name}_users where login_id = $user[login_id] || (clan_id = '$user[clan_id]' && clan_id > '0') && bounty > '0' order by login_name");
+	db("select login_name,login_id,bounty from {$db_name}_users where login_id = $user[login_id] || (clan_id = '$user[clan_id]' && clan_id > '0') && bounty > '0' order by login_name");
 	$list_em = dbr();
 
 	while($list_em) {
@@ -100,7 +100,7 @@ if($payoff < 0) {
 	print_page("Bounty Payoff",$text);
 	}
 } elseif($payoff >0) {
-	db("select bounty,login_name,clan_id from ${db_name}_users where login_id = '$payoff'");
+	db("select bounty,login_name,clan_id from {$db_name}_users where login_id = '$payoff'");
 	$topay = dbr();
 	$bount = round(($topay[bounty] / 100) * $commission);
 	$bount += $topay[bounty];
@@ -112,7 +112,7 @@ if($payoff < 0) {
 	  get_var('Bounty Payoff','bounty.php',"Are you sure you want to spend <b>$bount</b> credits to get rid of the bounty on <b class=b1>$topay[login_name]</b>?",'sure','yes');
 	}elseif($payoff == $user[login_id] || ($user[clan_id] == $topay[clan_id] && $user[clan_id] >= 1)) {
 		take_cash($bount);
-		dbn("update ${db_name}_users set bounty = 0 where login_id = '$payoff'");
+		dbn("update {$db_name}_users set bounty = 0 where login_id = '$payoff'");
 		$text .= "You have paid off the bounty on <b class=b1>$topay[login_name]</b>, at a cost of <b>$bount</b> Credits.<p>";
 	} else {
 		print_page("Bounty","You may not pay-off a bounty on anyone, other than yourself, or a clan-mate.");
@@ -134,9 +134,9 @@ END;
 	print_page("Bounty","You may not place a bounty during the first <b>$turns_before_attack</b> turns of your accounts' existence. This is because placing a bounty is a form of attack.");
 } else {
 	if ($user['clan_id'] > 0) {
-		db("select login_name,login_id from ${db_name}_users where ship_id != 1 && login_id != 1 && login_id != $user[login_id] && clan_id != $user[clan_id] && ((login_id != 3 && login_id != 2)|| joined_game = 1) order by login_name");
+		db("select login_name,login_id from {$db_name}_users where ship_id != 1 && login_id != 1 && login_id != $user[login_id] && clan_id != $user[clan_id] && ((login_id != 3 && login_id != 2)|| joined_game = 1) order by login_name");
 	} else {
-		db("select login_name,login_id from ${db_name}_users where ship_id != 1 && login_id != 1 && login_id != $user[login_id] order by login_name");
+		db("select login_name,login_id from {$db_name}_users where ship_id != 1 && login_id != 1 && login_id != $user[login_id] order by login_name");
 	}
 
 	$text .= <<<END

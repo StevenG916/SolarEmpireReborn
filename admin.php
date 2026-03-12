@@ -16,7 +16,7 @@ if (isset($game_vars)) {
 		foreach ($_REQUEST as $var => $value) {
 			$escaped_value = db_escape($value);
 			$escaped_var   = db_escape($var);
-			dbn("update ${db_name}_db_vars set value = '$escaped_value' where name = '$escaped_var' && '$escaped_value' <= max && '$escaped_value' >= min");
+			dbn("update {$db_name}_db_vars set value = '$escaped_value' where name = '$escaped_var' && '$escaped_value' <= max && '$escaped_value' >= min");
 			global $database_link;
 			if (mysqli_affected_rows($database_link) > 0) {
 				$savedVars[] = $var;
@@ -46,7 +46,7 @@ if (isset($game_vars)) {
 
 END;
 
-	db("select name, min, max, value,descript from ${db_name}_db_vars order by name");
+	db("select name, min, max, value,descript from {$db_name}_db_vars order by name");
 	while ($adminVar = dbr(1)) {
 		$out .= "\t\t<tr>\n\t\t\t<td><label for=\"" . $adminVar['name'] . "\">" .
 		 $adminVar['name'] . "</label>" . (in_array($adminVar['name'], $savedVars) ?
@@ -84,7 +84,7 @@ if(isset($more_money)){
 	} else {
 		settype($money_amount, "integer");
 		$out .= "Player's money reserves increased by <b>$money_amount</b><br>Note: This has NOT sent a message to the players. That is your job.<br><br>";
-		dbn("update ${db_name}_users set cash = cash + '$money_amount' where login_id != 1");
+		dbn("update {$db_name}_users set cash = cash + '$money_amount' where login_id != 1");
 		insert_history($user['login_id'],"Gave $money_amount credits to all players.");
 	}
 }
@@ -103,7 +103,7 @@ if(isset($post_game_news) && empty($text)) {
 if (isset($show_active)) {
 	$out = "Users that have logged with within the past 5 mins.";
 	$out .= "<br>Time Loaded: ".date("H:i:s (M d)")."<br><a href=admin.php?show_active=1>Reload</a>";
-	db("select last_request,login_name,login_id,clan_sym,clan_sym_color,clan_id from ${db_name}_users where last_request > ".(time()-300)." && login_id > 1 order by last_request desc");
+	db("select last_request,login_name,login_id,clan_sym,clan_sym_color,clan_id from {$db_name}_users where last_request > ".(time()-300)." && login_id > 1 order by last_request desc");
 	$player = dbr();
 	if(!$player){
 		$out .= "<p>There are no active users.";
@@ -147,7 +147,7 @@ if(isset($ban)){
 	if($ban == 2){ #show ban a player page.
 		$max_time = 168;
 		if(!$ban_target || $ban_target < 1 || !$ban_time){
-			db("select login_name,login_id from ${db_name}_users where banned_time <= " .
+			db("select login_name,login_id from {$db_name}_users where banned_time <= " .
 			 time() . " && banned_time != -1 order by login_name");
 			$out .= "Notes:<br>Number of hours you may ban a player for is limited to $max_time, which is 1 week (7 days).<br>Setting a ban-time of -1 means the ban time will last until the game is reset.<br>You may reset a ban period at any time from this page.<FORM action=$PHP_SELF method=POST name=ban_form>";
 			$out .= "Select Player to Ban: <br><br>";
@@ -160,7 +160,7 @@ if(isset($ban)){
 			$out .= "<p><br>Enter the number of hours you would like the player to be banned for:<br><br><INPUT type=text name=ban_time size=3> hours";
 			$out .= "<INPUT type=hidden name=ban value=2><p><br>Please give the reason you are banning this player (do not use apostrophes or quotation marks).<p><textarea name=ban_reason cols=50 rows=5 wrap=soft></textarea><br><br><INPUT type=submit value=Ban></form><p>";
 		} elseif ($ban_target > 0){
-			db("select login_name from ${db_name}_users where login_id = $ban_target");
+			db("select login_name from {$db_name}_users where login_id = $ban_target");
 			$ban_info = dbr();
 			if($ban_time > $max_time || $ban_time < -1){
 				$out = "Maximum period of time a player may be banned for is <b>$max_time</b> hours.<br>Or set to -1 to ban for the rest of the game.";
@@ -181,7 +181,7 @@ if(isset($ban)){
 					$ban_time = time() + round($ban_time * 3600);
 				}
 
-				dbn("update ${db_name}_users set banned_time = '$ban_time', banned_reason = '$ban_reason' where login_id = '$ban_target'");
+				dbn("update {$db_name}_users set banned_time = '$ban_time', banned_reason = '$ban_reason' where login_id = '$ban_target'");
 				if($ban_time > 0){
 					$time_text = date( "D jS M - H:i",$ban_time);
 				} else {
@@ -193,16 +193,16 @@ if(isset($ban)){
 		}
 #		print_page("Ban Player",$out);
 	} elseif(isset($unban)){
-		db("select login_name from ${db_name}_users where login_id = $unban");
+		db("select login_name from {$db_name}_users where login_id = $unban");
 		$ban_info = dbr();
 		insert_history($unban,"Was Un-Banned from the game");
-		dbn("update ${db_name}_users set banned_time = '0', banned_reason = '' where login_id = '$unban'");
+		dbn("update {$db_name}_users set banned_time = '0', banned_reason = '' where login_id = '$unban'");
 		$out .= "<b class=b1>$ban_info[login_name]</b> was un-banned.<br><br>";
 		post_news("<b class=b1>$ban_info[login_name]</b> was un-banned by the Admin");
 	}
 
 	#list players who are presently banned
-	db("select login_name, login_id, banned_time, banned_reason from ${db_name}_users where banned_time = -1 || banned_time > ".time()." order by banned_time desc");
+	db("select login_name, login_id, banned_time, banned_reason from {$db_name}_users where banned_time = -1 || banned_time > ".time()." order by banned_time desc");
 	$b_t1_out = "Listing Banned Players:";
 	$b_t1_out .= make_table(array("Login Name","Banned until","Reason",""));
 	while($list_banned = dbr()){
@@ -295,7 +295,7 @@ exit;
 #reset signup times
 if(isset($reset_signup)) {
 	$out = "Signup times reset.<p>";
-	dbn("update ${db_name}_users set joined_game = " . time());
+	dbn("update {$db_name}_users set joined_game = " . time());
 	insert_history($user['login_id'],"Reset Signup Times.");
 }
 
@@ -308,43 +308,43 @@ if(isset($reset)){
 	} elseif($reset == 2) {
 		$out .= "Game reset started.<p>";
 
-		dbn("delete from ${db_name}_users where login_id != " . ADMIN_ID);
-		dbn("delete from ${db_name}_user_options where login_id != " . ADMIN_ID);
+		dbn("delete from {$db_name}_users where login_id != " . ADMIN_ID);
+		dbn("delete from {$db_name}_user_options where login_id != " . ADMIN_ID);
 		$out .= "Users & their options deleted.<br>";
 
-		dbn("update ${db_name}_users set turns='1000', turns_run='0', location=1, ship_id=NULL, cash='100000000', on_planet='0', last_attack='0', last_attack_by='', ships_killed='0', ships_lost=0, ships_lost_points=0, ships_killed_points=0, genesis='1', gamma='1', clan_sym='', clan_sym_color='', clan_id=0, fighters_killed='0', one_brob='0', alpha='1', sn_effect='0', last_request='0', score='0', tech='100000' where login_id=" . ADMIN_ID);
+		dbn("update {$db_name}_users set turns='1000', turns_run='0', location=1, ship_id=NULL, cash='100000000', on_planet='0', last_attack='0', last_attack_by='', ships_killed='0', ships_lost=0, ships_lost_points=0, ships_killed_points=0, genesis='1', gamma='1', clan_sym='', clan_sym_color='', clan_id=0, fighters_killed='0', one_brob='0', alpha='1', sn_effect='0', last_request='0', score='0', tech='100000' where login_id=" . ADMIN_ID);
 		$out .= "Admin account refurbished.<br>";
 
-		dbn("delete from ${db_name}_news");
+		dbn("delete from {$db_name}_news");
 		$out .= "News erased.<br>";
 
-		dbn("delete from ${db_name}_planets");
+		dbn("delete from {$db_name}_planets");
 		$out .= "Planets erased.<br>";
 
-		dbn("delete from ${db_name}_messages where login_id != " . ADMIN_ID . ' && login_id != ' . OWNER_ID);
+		dbn("delete from {$db_name}_messages where login_id != " . ADMIN_ID . ' && login_id != ' . OWNER_ID);
 		$out .= "Messages deleted.<br>";
 
-		dbn("delete from ${db_name}_politics");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '1', 'Monarch', '0', '', '0')");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '2', 'Industry Senator', '0', '', '0')");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '3', 'Military Senator', '0', '', '0')");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '4', 'Defense Senator', '0', '', '0')");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '5', 'Trade Senator', '0', '', '0')");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '6', 'War Senator', '0', '', '0')");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '7', 'Espionage Senator', '0', '', '0')");
-		dbn("INSERT INTO ${db_name}_politics VALUES ( '8', 'Research Senator', '0', '', '0')");
+		dbn("delete from {$db_name}_politics");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '1', 'Monarch', '0', '', '0')");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '2', 'Industry Senator', '0', '', '0')");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '3', 'Military Senator', '0', '', '0')");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '4', 'Defense Senator', '0', '', '0')");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '5', 'Trade Senator', '0', '', '0')");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '6', 'War Senator', '0', '', '0')");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '7', 'Espionage Senator', '0', '', '0')");
+		dbn("INSERT INTO {$db_name}_politics VALUES ( '8', 'Research Senator', '0', '', '0')");
 		$out .= "Politics refurbished.<br>";
 
-		dbn("delete from ${db_name}_diary where login_id != " . ADMIN_ID . ' && login_id != ' . OWNER_ID);
+		dbn("delete from {$db_name}_diary where login_id != " . ADMIN_ID . ' && login_id != ' . OWNER_ID);
 		$out .= "Diaries erased.<br>";
 
-		dbn("delete from ${db_name}_ships");
+		dbn("delete from {$db_name}_ships");
 		$out .= "Ships deleted.<br>";
 
-		dbn("delete from ${db_name}_clans");
+		dbn("delete from {$db_name}_clans");
 		$out .= "Clans deleted.<br>";
 
-		dbn("delete from ${db_name}_bilkos");
+		dbn("delete from {$db_name}_bilkos");
 		$out .= "Bilkos Auction House Emptied.<br>";
 
 		dbn("update se_games set last_reset = ".time()." where db_name = '$db_name'");
@@ -368,9 +368,9 @@ if(isset($planet_list) || isset($sort_planets)){
 			$going = "desc";
 			$sorted=1;
 		}
-		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from ${db_name}_planets where location != 1 && planet_type >= 0 order by '$sort_planets' $going");
+		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from {$db_name}_planets where location != 1 && planet_type >= 0 order by '$sort_planets' $going");
 	} else {
-		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from ${db_name}_planets where location != 1 && planet_type >= 0 order by login_name asc, fighters desc, planet_name asc");
+		db("select login_name,planet_name,location,fighters,colon,cash,metal,fuel,elect,organ from {$db_name}_planets where location != 1 && planet_type >= 0 order by login_name asc, fighters desc, planet_name asc");
 	}
 
 	$clan_planet = dbr(1);

@@ -37,7 +37,7 @@ if($user['genesis'] < 1) {
 
 	// remove gen device, but not from admin.
 	if($user['login_id'] != ADMIN_ID){
-		dbn("update ${db_name}_users set genesis = genesis - 1 where login_id = $user[login_id]");
+		dbn("update {$db_name}_users set genesis = genesis - 1 where login_id = $user[login_id]");
 	}
 	charge_turns(5);
 
@@ -49,8 +49,8 @@ if($user['genesis'] < 1) {
 
 
 	// build the new planet
-	dbn("insert into ${db_name}_planets (planet_name,location,planet_type,login_id,login_name,clan_id,planet_img) values ('$planet_name', '$user[location]', '0', '$user[login_id]', '$user[login_name]', '$clan_id', '$planet_img')");
-	$last_planet = mysql_insert_id();
+	dbn("insert into {$db_name}_planets (planet_name,location,planet_type,login_id,login_name,clan_id,planet_img) values ('$planet_name', '$user[location]', '0', '$user[login_id]', '$user[login_name]', '$clan_id', '$planet_img')");
+	$last_planet = db_insert_id();
 
 	if ($uv_planet_slots_use) {
 		dbn("UPDATE `{$db_name}_stars` SET `planetary_slots` = `planetary_slots` - 1 where `star_id` = $star[star_id]");

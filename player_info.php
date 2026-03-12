@@ -18,14 +18,14 @@ if(isset($self_destruct)) {
 	}
 	$math = 0;
 	$temp444 = $expl;
-	while ($var = each($temp444)) {
-		db("select login_id from ${db_name}_ships where ship_id = '$var[value]'");
+	foreach ($temp444 as $var_key => $var_value) {
+		db("select login_id from {$db_name}_ships where ship_id = '$var_value'");
 		$target_ship = dbr();
 		$math++;
 		if($target_ship[login_id] != $user[login_id]) {
 		print_page("Self Destruct","You can only self destruct one of your own ships!");
 		break;
-		} elseif($user[ship_id] == $var[value]) {
+		} elseif($user[ship_id] == $var_value) {
 		print_page("Self Destruct","You may not destroy the ship that you are commanding.");
 		break;
 		}
@@ -37,8 +37,8 @@ if(isset($self_destruct)) {
 	$ostr .= "<form name=destroy_ships action=player_info.php method=POST>";
 	$temp444 = $expl;
 	$i=0;
-	while ($var = each($temp444)) {
-		$ostr .= "<input type=hidden name=expl[$i] value='$var[value]'>";
+	foreach ($temp444 as $var_key => $var_value) {
+		$ostr .= "<input type=hidden name=expl[$i] value='$var_value'>";
 		$i++;
 	}
 	$ostr .= '<input type=hidden name=self_destruct value=1>';
@@ -47,9 +47,9 @@ if(isset($self_destruct)) {
 	print_page("Sure?",$ostr);
 	} else {
 	$temp444 = $expl;
-	while ($var = each($temp444)) {
-		dbn("update ${db_name}_ships set towed_by = 0 where towed_by = '$var[value]'");
-		dbn("delete from ${db_name}_ships where ship_id = '$var[value]'");
+	foreach ($temp444 as $var_key => $var_value) {
+		dbn("update {$db_name}_ships set towed_by = 0 where towed_by = '$var_value'");
+		dbn("delete from {$db_name}_ships where ship_id = '$var_value'");
 	}
 		post_news("<b class=b1>$user[login_name]</b> self destructed <b>$math</b> ship(s).");
 			charge_turns($math);
@@ -163,7 +163,7 @@ if(isset($transfer)) {
 			print_page("Transfer Error","The admin has restricted access to Credit transfer. You may only transfer Credits once you have been in the game <b>$min_before_transfer</b> days or more. <br><a href=javascript:back()>Go back</a><br>");
 		} else {
 			take_cash($trans_amount);
-			dbn("update ${db_name}_users set cash = cash + $trans_amount where login_id = '".$trans_target_id."'");
+			dbn("update {$db_name}_users set cash = cash + $trans_amount where login_id = '".$trans_target_id."'");
 			send_message($trans_target_id,"<b class=b1>$user[login_name]</b> has sent you <b>$trans_amount</b> Credits.");
 			insert_history($user['login_id'],"Transfered $trans_amount to $trans_target");
 			print_page("Transfer Complete","You sent <b>$trans_amount</b> Credits to <b class=b1>$trans_target</b>.");
@@ -171,11 +171,11 @@ if(isset($transfer)) {
 	}
 }
 
-db("select u.*, pu.*, pu.login_name as generic_l_name, u.login_name as login_name from ${db_name}_users u, user_accounts pu where u.login_id = '$target' && pu.login_id = '$target'");
+db("select u.*, pu.*, pu.login_name as generic_l_name, u.login_name as login_name from {$db_name}_users u, user_accounts pu where u.login_id = '$target' && pu.login_id = '$target'");
 $player = dbr();
 
 #used to calculate percentages
-db("select sum(cash) as cash, sum(fighters_killed) as fighters_killed, sum(fighters_lost) as fighters_lost, sum(score) as score, sum(tech) as tech, sum(ships_killed) as ships_killed, sum(ships_lost) as ships_lost, sum(ships_killed_points) as ships_killed_points, sum(ships_lost_points) as ships_lost_points, sum(turns_run) as turns_run, sum(turns) as turns, sum(game_login_count) as game_login_count from ${db_name}_users where login_id > '5'");
+db("select sum(cash) as cash, sum(fighters_killed) as fighters_killed, sum(fighters_lost) as fighters_lost, sum(score) as score, sum(tech) as tech, sum(ships_killed) as ships_killed, sum(ships_lost) as ships_lost, sum(ships_killed_points) as ships_killed_points, sum(ships_lost_points) as ships_lost_points, sum(turns_run) as turns_run, sum(turns) as turns, sum(game_login_count) as game_login_count from {$db_name}_users where login_id > '5'");
 $all_player = dbr();
 
 # Won't display alien or pirate information, or the other two reserved accounts.
@@ -213,9 +213,9 @@ if($full == 1 || isset($special_show)) {
 	$text .= quick_row("Last IP Address",$player['last_ip']);
 	$text .= quick_row("Num. Games Joined",$player['num_games_joined']);
 	$text .= quick_row("&nbsp;","");
-	db("select count(ship_id) from ${db_name}_ships where login_id = '$target'");
+	db("select count(ship_id) from {$db_name}_ships where login_id = '$target'");
 	$ship_count = dbr();
-	db("select count(ship_id) from ${db_name}_ships where login_id > 5");
+	db("select count(ship_id) from {$db_name}_ships where login_id > 5");
 	$ship_count_all = dbr();
 
 	$text .= quick_row("Ship Count",calc_perc($ship_count[0],$ship_count_all[0]));
@@ -238,9 +238,9 @@ $text .= quick_row("Fighters Lost",calc_perc($player['fighters_lost'],$all_playe
 $text .= quick_row("Flagship Count",num_flagships($player['one_brob']));
 
 if($score_method != 0){
-	db("select count(login_id) from ${db_name}_users where score > '$player[score]' && login_id > 5");
+	db("select count(login_id) from {$db_name}_users where score > '$player[score]' && login_id > 5");
 	$score_front = dbr();
-	db("select count(login_id) from ${db_name}_users where login_id > 5");
+	db("select count(login_id) from {$db_name}_users where login_id > 5");
 	$score_back = dbr();
 
 	$score_front[0]++;
@@ -281,9 +281,9 @@ if($full) {
 			$going = "desc";
 			$sorted_planets=1;
 		}
-		db("select planet_name,location,fighters,colon,cash,metal,fuel,elect from ${db_name}_planets where login_id = '$target' order by '$sort_planets' $going");
+		db("select planet_name,location,fighters,colon,cash,metal,fuel,elect from {$db_name}_planets where login_id = '$target' order by '$sort_planets' $going");
 	} else {
-		db("select planet_name,location,fighters,colon,cash,metal,fuel,elect from ${db_name}_planets where login_id = '$target' order by fighters desc, planet_name asc, location desc");
+		db("select planet_name,location,fighters,colon,cash,metal,fuel,elect from {$db_name}_planets where login_id = '$target' order by fighters desc, planet_name asc, location desc");
 		$sorted_planets = "";
 	}
 	$clan_planet = dbr(1);

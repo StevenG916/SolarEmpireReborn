@@ -35,38 +35,38 @@ function do_damage($amount,$from,$target,$target_ship)
 	global $db_name,$error_str,$user,$user_ship,$yesbount;
 	if($amount >= 1) {
 		if($amount < $target_ship['fighters'] + $target_ship['shields']) { #ship not destroyed
-			dbn("update ${db_name}_users set last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
+			dbn("update {$db_name}_users set last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
 			$shield_damage = $amount;
 			if($shield_damage > $target_ship['shields']) {
 				$shield_damage = $target_ship['shields'];
 			}
 			$amount -= $shield_damage;
-			dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$amount' where login_id = '$from[login_id]'");
-			dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$amount' where login_id = '$target[login_id]'");
-			dbn("update ${db_name}_ships set fighters = fighters - $amount, shields = shields - $shield_damage where ship_id = '$target_ship[ship_id]'");
+			dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$amount' where login_id = '$from[login_id]'");
+			dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$amount' where login_id = '$target[login_id]'");
+			dbn("update {$db_name}_ships set fighters = fighters - $amount, shields = shields - $shield_damage where ship_id = '$target_ship[ship_id]'");
 			return 0;
 		} else { #ship destroyed
-			dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$target_ship[fighters]', ships_killed = ships_killed + 1, ships_killed_points = ships_killed_points + $target_ship[point_value] where login_id = '$from[login_id]'");
+			dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$target_ship[fighters]', ships_killed = ships_killed + 1, ships_killed_points = ships_killed_points + $target_ship[point_value] where login_id = '$from[login_id]'");
 			if($target_ship['shipclass'] == 2) { #escape pod destroyed
-				dbn("delete from ${db_name}_ships where ship_id = $target_ship[ship_id]"); // delete ship record
-				dbn("update ${db_name}_users set location = 1, ships_lost = ships_lost + 1, ships_lost_points = ships_lost_points + $target_ship[point_value], fighters_lost = fighters_lost + '$target_ship[fighters]', ship_id = NULL,last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
+				dbn("delete from {$db_name}_ships where ship_id = $target_ship[ship_id]"); // delete ship record
+				dbn("update {$db_name}_users set location = 1, ships_lost = ships_lost + 1, ships_lost_points = ships_lost_points + $target_ship[point_value], fighters_lost = fighters_lost + '$target_ship[fighters]', ship_id = NULL,last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
 				$target['ship_id'] = NULL;
 			} else { #normal ship destroyed
 				//Minerals go to the system
-				dbn("update ${db_name}_stars set fuel = fuel + ".($target_ship['fuel']*(mt_rand(200,800)/1000)).", metal = metal + ".($target_ship['metal']*(mt_rand(400,900)/1000))." where star_id = $target_ship[location]");
-				dbn("delete from ${db_name}_ships where ship_id = $target_ship[ship_id]"); // delete ship record
+				dbn("update {$db_name}_stars set fuel = fuel + ".($target_ship['fuel']*(mt_rand(200,800)/1000)).", metal = metal + ".($target_ship['metal']*(mt_rand(400,900)/1000))." where star_id = $target_ship[location]");
+				dbn("delete from {$db_name}_ships where ship_id = $target_ship[ship_id]"); // delete ship record
 
 
 				if($target['ship_id'] != $target_ship['ship_id']) {
 					$new_ship_id = $target['ship_id'];
 				} else {
 					#first check to see if user has other ships in same system. (will command one with most fighters).
-					db("select ship_id from ${db_name}_ships where login_id = '$target_ship[login_id]' && location = '$target_ship[location]' order by fighters desc limit 1");
+					db("select ship_id from {$db_name}_ships where login_id = '$target_ship[login_id]' && location = '$target_ship[location]' order by fighters desc limit 1");
 					$other_ship = dbr(1);
 
 					#if user has not got other ships in same system, will send command ship in a different system (preference being for ships that are not towing. if many not towing the one with the most fighters will be selected).
 					if(!$other_ship) {
-						db("select ship_id from ${db_name}_ships where login_id = '$target_ship[login_id]' order by towed_by asc, fighters desc limit 1");
+						db("select ship_id from {$db_name}_ships where login_id = '$target_ship[login_id]' order by towed_by asc, fighters desc limit 1");
 						$other_ship = dbr(1);
 					}
 				}
@@ -77,10 +77,10 @@ function do_damage($amount,$from,$target,$target_ship)
 					$new_ship_id = $temp['ship_id'];
 					// run to random sector?
 				}
-				db("select * from ${db_name}_ships where ship_id = '$new_ship_id'");
+				db("select * from {$db_name}_ships where ship_id = '$new_ship_id'");
 				$user_ship = dbr(1);
 
-				dbn("update ${db_name}_users set ships_lost = ships_lost + 1, ships_lost_points = ships_lost_points + $target_ship[point_value], location='$user_ship[location]', ship_id = '$new_ship_id', last_attack =".time().", last_attack_by = '$from[login_name]', fighters_lost = fighters_lost + '$target_ship[fighters]' where login_id = '$target[login_id]'");
+				dbn("update {$db_name}_users set ships_lost = ships_lost + 1, ships_lost_points = ships_lost_points + $target_ship[point_value], location='$user_ship[location]', ship_id = '$new_ship_id', last_attack =".time().", last_attack_by = '$from[login_name]', fighters_lost = fighters_lost + '$target_ship[fighters]' where login_id = '$target[login_id]'");
 				$user['ship_id'] = $new_ship_id;
 			}
 			return 1;
@@ -97,7 +97,7 @@ function do_damage($amount,$from,$target,$target_ship)
 # ---------------------------------
 sudden_death_check($user);
 
-db("select * from ${db_name}_planets where planet_id = '$planet_id'");
+db("select * from {$db_name}_planets where planet_id = '$planet_id'");
 $planet = dbr();
 $planet_loc = $planet['location'];
 $has_pass = 0;
@@ -117,7 +117,7 @@ if($user['location'] != $planet_loc) {
 //user attacking the planet
 } elseif(isset($attack_planet)) {
 
-	db("select * from ${db_name}_planets where planet_id = '$planet_id'");
+	db("select * from {$db_name}_planets where planet_id = '$planet_id'");
 	$planet = dbr(1);
 	if($user['location'] != $planet['location']) {
 		print_page("Planet","That planet is not in this star system.<br> An easy mistake. After all, planets move all the time!");
@@ -126,9 +126,9 @@ if($user['location'] != $planet_loc) {
 			print_page("Attacking Planet","The admin has disabled planet attacks.");
 		} elseif($user['turns'] < $planet_attack_turn_cost) {
 			print_page("Attack Failed","You don't have the <b>$planet_attack_turn_cost</b> turns to use for the attack.");
-		} elseif(ereg("so",$user_ship['config'])) {
+		} elseif(str_contains($user_ship['config'], 'so')) {
 			print_page("Planet","Your ship is not equipped to attack planets.");
-		} elseif(ereg("no",$user_ship['config'])) {
+		} elseif(str_contains($user_ship['config'], 'no')) {
 			print_page("Attacking Planet","You may not attack using a ship that cannot attack.");
 		} elseif(!isset($sure)) {
 			get_var('Attacking Planet','planet.php',"Are you sure you want to attack the planet <b class=b1>$planet[planet_name]</b>?",'sure','yes');
@@ -306,7 +306,7 @@ if($user['location'] != $planet_loc) {
 
 			function inc_dam($stat,$ship,$num){
 			#user battleship
-				if (eregi($stat,$ship['config'])){
+				if (str_contains($ship['config'], $stat)){
 					return $num;
 				}
 			}
@@ -474,9 +474,9 @@ if($user['location'] != $planet_loc) {
 				if($t_destroyed == 1){ #planet gets taken out none-the-less
 					$attack_damage = $planet['fighters'];
 				}
-				dbn("update ${db_name}_planets set fighters = fighters - '$attack_damage' where planet_id = $planet[planet_id]");
-				dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$attack_damage' where login_id = '$planet[login_id]'");
-				dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$attack_damage' where login_id = '$user[login_id]'");
+				dbn("update {$db_name}_planets set fighters = fighters - '$attack_damage' where planet_id = $planet[planet_id]");
+				dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$attack_damage' where login_id = '$planet[login_id]'");
+				dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$attack_damage' where login_id = '$user[login_id]'");
 
 				if($user['ship_id'] == NULL) { #now dead
 					$user_str .= "<br><br><b class=b1>$planet[planet_name]</b> successfully blew your Escape Pod to smitherines.";
@@ -500,25 +500,25 @@ if($user['location'] != $planet_loc) {
 				$user_str .= "<br><br>The planets defences have been eradicated.<br>Your ship survived the encounter.";
 				$rs = "<br><br><a href=planet.php?planet_id=$planet_id>Land</a>".$rs;
 				$mess .= "<br><br>You planets defenses were all de-commisioned by way of being destroyed during the battle.<br>The attacking ship survived the encounter.";
-				dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$planet[fighters]' where login_id = '$planet[login_id]'");
-				dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$planet[fighters]', on_planet = '$planet_id' where login_id = '$user[login_id]'");
-				dbn("update ${db_name}_planets set fighters = 0 where planet_id = '$planet[planet_id]'");
+				dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$planet[fighters]' where login_id = '$planet[login_id]'");
+				dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$planet[fighters]', on_planet = '$planet_id' where login_id = '$user[login_id]'");
+				dbn("update {$db_name}_planets set fighters = 0 where planet_id = '$planet[planet_id]'");
 				$planet['fighters'] = 0;
 
 			#nothing dies.
 			} else {
 				$user_str .= "Nothing was eliminated.";
 				$mess .= "Nothing was eliminated.";
-				dbn("update ${db_name}_planets set fighters = fighters - '$attack_damage' where planet_id = '$planet[planet_id]'");
-				dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$attack_damage' where login_id = '$planet[login_id]'");
-				dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$attack_damage' where login_id = '$user[login_id]'");
+				dbn("update {$db_name}_planets set fighters = fighters - '$attack_damage' where planet_id = '$planet[planet_id]'");
+				dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$attack_damage' where login_id = '$planet[login_id]'");
+				dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$attack_damage' where login_id = '$user[login_id]'");
 			}
 
-			db("select attack_report from ${db_name}_user_options where login_id = '$planet[login_id]'");
+			db("select attack_report from {$db_name}_user_options where login_id = '$planet[login_id]'");
 			$target_options = dbr(1);
 
 			#get recent user information.
-			db("select * from ${db_name}_users where login_id = '$user[login_id]'");
+			db("select * from {$db_name}_users where login_id = '$user[login_id]'");
 			$user = dbr();
 			$user_ship = userShip($user['ship_id']);
 
@@ -538,7 +538,7 @@ if($user['location'] != $planet_loc) {
 
 		}
 	} else {
-		dbn("update ${db_name}_users set on_planet = '$planet_id' where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set on_planet = '$planet_id' where login_id = '$user[login_id]'");
 		$user['on_planet'] = $planet_id;
 	}
 
@@ -581,7 +581,7 @@ if(isset($new_pass) && isset($change_pass) && isset($has_pass) && valid_input($n
 			$new_pass = 0;
 		}
 
-		dbn("update ${db_name}_planets set pass = '$new_pass' where planet_id = '$planet_id'");
+		dbn("update {$db_name}_planets set pass = '$new_pass' where planet_id = '$planet_id'");
 		$planet['pass'] = $new_pass;
 		$passwd = $new_pass;
 		$output_str .= "The password was changed successfuly.";
@@ -612,7 +612,7 @@ $rs = "<p><a href=planet.php?planet_id=$planet_id>Return to Planet</a><br>";
 
 #destroy planet
 if(isset($destroy)) {
-	db("select * from ${db_name}_planets where planet_id = $user[on_planet]");
+	db("select * from {$db_name}_planets where planet_id = $user[on_planet]");
 	if($user['login_id'] == $planet['login_id'] || ($user['clan_id'] == $planets['clan_id'] && $user['clan_id'] > 0)) {
 		if($uv_planets >= 0 && $user['terra_imploder'] <= 0){
 			$output_str.= "The present game setup means that only a Terra Imploder can destroy a planet. You do not have one.<br><br>";
@@ -620,14 +620,14 @@ if(isset($destroy)) {
 			get_var('Destroy Planet','planet.php','Are you sure you want to destroy this planet?','sure','yes');
 		} else {
 			if($uv_planets >= 0 && $user['login_id'] != ADMIN_ID){
-				dbn("update ${db_name}_users set on_planet = 0, terra_imploder = terra_imploder - 1 where login_id = $user[login_id]");
+				dbn("update {$db_name}_users set on_planet = 0, terra_imploder = terra_imploder - 1 where login_id = $user[login_id]");
 				$terra_txt = " with a Terra Imploder";
 				$terra_txt2 = " using 1 Terra Implosion Device";
 			} else {
-				dbn("update ${db_name}_users set on_planet = 0 where login_id = $user[login_id]");
+				dbn("update {$db_name}_users set on_planet = 0 where login_id = $user[login_id]");
 			}
-			dbn("update ${db_name}_stars set planetary_slots = planetary_slots + 1 where star_id = '$user[location]'");
-			dbn("delete from ${db_name}_planets where planet_id = $user[on_planet]");
+			dbn("update {$db_name}_stars set planetary_slots = planetary_slots + 1 where star_id = '$user[location]'");
+			dbn("delete from {$db_name}_planets where planet_id = $user[on_planet]");
 			post_news(addslashes("<b class=b1>$user[login_name]</b> destroyed the planet <b class=b1>$planet[planet_name]</b>".$terra_txt));
 			$rs = '<p><a href=location.php>Back to the Star System</a><br>';
 			print_page("Planet Destroyed","Planet <b class=b1>$planet[planet_name]</b> destroyed".$terra_txt2);
@@ -637,7 +637,7 @@ if(isset($destroy)) {
 	}
 } elseif(isset($claim)) {
 
-	//db("select * from ${db_name}_planets where planet_id = '$user[on_planet]'");
+	//db("select * from {$db_name}_planets where planet_id = '$user[on_planet]'");
 	//$planet = dbr();
 
 	if($planet['login_id'] == $user['login_id']) {
@@ -649,7 +649,7 @@ if(isset($destroy)) {
 	} else {
 		send_message($planet['login_id'],"<b class=b1>$user[login_name]</b> claimed the planet <b class=b1>$planet[planet_name]</b> from you.");
 		post_news("<b class=b1>$user[login_name]</b> has claimed the planet <b class=b1>$planet[planet_name]</b>.");
-		dbn("update ${db_name}_planets set clan_id = '$user[clan_id]', login_id = '$user[login_id]', login_name = '$user[login_name]', research_fac = 0, pass = 0 where planet_id = '$planet[planet_id]'");
+		dbn("update {$db_name}_planets set clan_id = '$user[clan_id]', login_id = '$user[login_id]', login_name = '$user[login_name]', research_fac = 0, pass = 0 where planet_id = '$planet[planet_id]'");
 		$planet['pass'] = 0;
 		$planet['clan_id'] = $user['clan_id'];
 		$planet['login_id'] = $user['login_id'];
@@ -663,12 +663,12 @@ if(isset($destroy)) {
 */
 } elseif(isset($autoshift)){
 	#get ship information/see if there is enough capacity etc.
-	db("select count(ship_id), sum(cargo_bays-metal-fuel-elect-organ-colon) from ${db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && (cargo_bays-metal-fuel-elect-organ-colon) > 0");
+	db("select count(ship_id), sum(cargo_bays-metal-fuel-elect-organ-colon) from {$db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && (cargo_bays-metal-fuel-elect-organ-colon) > 0");
 	$ship_count = dbr();
 	$colonist_cap = $ship_count[1];			#total cargo capacity of fleet in system
 	$colonist = $ship_count[1];				#total cargo capacity of fleet in system
 	$ship_count = $ship_count[0];			#number of ships in system that have cargo capacity
-	db("select ship_id from ${db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && config REGEXP 'ws'");					#ensure there is a transverser with the ws upgrade
+	db("select ship_id from {$db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && config REGEXP 'ws'");					#ensure there is a transverser with the ws upgrade
 	$lead = dbr();
 
 	#figure out what the user is dealing in.
@@ -697,7 +697,7 @@ if(isset($destroy)) {
 		$output_str .= "You do not have a Transverser in this system that has the <b>Wormhole Stabiliser</b> Upgrade. <br>This is required to allow for Autoshifting of anything.<p>";
 	} elseif(!isset($dest_system)){ #get the user to select a system from where the colonists are to come from
 		$new_page = "Please select a planet from which the $text_mat are going to come:";
-		db2("select planet_id,planet_name from ${db_name}_planets where login_id = '$user[login_id]' && location != '$user[location]' && ((colon - (alloc_fight + alloc_organ + alloc_elect) > 0 && $autoshift = 1) || ($autoshift > 1 && $tech_mat > 0))"); #gets users planet other than ones in the present system.
+		db2("select planet_id,planet_name from {$db_name}_planets where login_id = '$user[login_id]' && location != '$user[location]' && ((colon - (alloc_fight + alloc_organ + alloc_elect) > 0 && $autoshift = 1) || ($autoshift > 1 && $tech_mat > 0))"); #gets users planet other than ones in the present system.
 		$other_sys = dbr2();
 
 		if(!isset($other_sys['planet_id']) && $autoshift > 1){ #determine if there is a suitable target.
@@ -739,7 +739,7 @@ if(isset($destroy)) {
 						$bays_used = 0;
 						$count_quick = 0;
 
-						db2("select sum(cargo_bays-metal-fuel-elect-organ-colon),ship_id from ${db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && (cargo_bays-metal-fuel-elect-organ-colon) > 0 group by ship_id order by (cargo_bays-metal-fuel-elect-organ-colon) desc");
+						db2("select sum(cargo_bays-metal-fuel-elect-organ-colon),ship_id from {$db_name}_ships where login_id = '$user[login_id]' && location = '$user[location]' && (cargo_bays-metal-fuel-elect-organ-colon) > 0 group by ship_id order by (cargo_bays-metal-fuel-elect-organ-colon) desc");
 						$quick_ship = dbr2();
 						while($quick_ship && $bays_used < $colonist && $free_turns > $count_quick){
 							$bays_used += $quick_ship[0];
@@ -762,7 +762,7 @@ if(isset($destroy)) {
 					<p>From <b class=b1>Sol</b>(<b>#1</b>) to the planet <b class=b1>$planet[planet_name]</b>(#<b>$planet[location]</b>).
 					<p>At a total cost of <b>$turn</b> turns and <b>$c_c</b> Credits?",'sure','');
 				} else { #update the game cos the user does want to do the autoshifting.
-					dbn("update ${db_name}_planets set colon = colon + '$colonist' where planet_id = '$planet_id'");
+					dbn("update {$db_name}_planets set colon = colon + '$colonist' where planet_id = '$planet_id'");
 					charge_turns($turn);
 					take_cash($c_c);
 					$output_str .= "Transportation of <b>$colonists</b> Colonists Complete.<p>";
@@ -771,7 +771,7 @@ if(isset($destroy)) {
 
 		} else { #user is getting the materials from a system other than Sol. Thus different maths and stuff needs to be done as there is a finite number of materials, but no cash cost.
 
-			db("select location,login_id,planet_name,$tech_mat,planet_id,alloc_fight,alloc_elect,alloc_organ from ${db_name}_planets where planet_id = '$dest_system'");
+			db("select location,login_id,planet_name,$tech_mat,planet_id,alloc_fight,alloc_elect,alloc_organ from {$db_name}_planets where planet_id = '$dest_system'");
 			$from_sys=dbr();
 			$turn = round(get_star_dist($user['location'],$from_sys['location'])/1.8 +1)*2; #work out turn cost
 			#echo $turns_can_use = floor(($user['turns']- $turn) * 1.35);
@@ -802,8 +802,8 @@ if(isset($destroy)) {
 					get_var('Autoshift','planet.php',"Are you sure you want to autoshift using the folling stats:
 					<p>Shift <b>$col_to_take</b> $text_mat from $from_sys[planet_name](#<b>$from_sys[location]</b>) to the planet <b class=b1>$planet[planet_name]</b>(#<b>$planet[location]</b>) using <b>$turn</b> turns?",'sure','');
 				} else { #update the game as the user does want to do the autoshifting.
-					dbn("update ${db_name}_planets set $tech_mat = $tech_mat + '$col_to_take' where planet_id = '$planet_id'");				#give goods to recieving planet
-					dbn("update ${db_name}_planets set $tech_mat = $tech_mat - '$col_to_take' where planet_id = '$from_sys[planet_id]'");	#take goods from sending planet.
+					dbn("update {$db_name}_planets set $tech_mat = $tech_mat + '$col_to_take' where planet_id = '$planet_id'");				#give goods to recieving planet
+					dbn("update {$db_name}_planets set $tech_mat = $tech_mat - '$col_to_take' where planet_id = '$from_sys[planet_id]'");	#take goods from sending planet.
 					charge_turns($turn);
 					$output_str .= "Transportation of <b>$col_to_take</b> $text_mat Complete.<p>";
 				}
@@ -841,9 +841,9 @@ if(isset($destroy)) {
 					if($set_to > $planet[$key]){ #user putting onto planet.
 						$take_from_user = $set_to - $planet[$key];
 						$user_ship[$key] -= $take_from_user;
-						dbn("update ${db_name}_ships set $key = $key - '$take_from_user' where ship_id = $user_ship[ship_id]");
+						dbn("update {$db_name}_ships set $key = $key - '$take_from_user' where ship_id = $user_ship[ship_id]");
 						$planet[$key] = $set_to;
-						dbn("update ${db_name}_planets set $key = '$set_to' where planet_id = $user[on_planet]");
+						dbn("update {$db_name}_planets set $key = '$set_to' where planet_id = $user[on_planet]");
 					} else { #taking from planet.
 
 						$give_to_user = $planet[$key] - $set_to; #ensure no ship limits are broken.
@@ -855,9 +855,9 @@ if(isset($destroy)) {
 						$set_to = $planet[$key] - $give_to_user;
 
 						$user_ship[$key] += $give_to_user;
-						dbn("update ${db_name}_ships set $key = $key + '$give_to_user' where ship_id = $user_ship[ship_id]");
+						dbn("update {$db_name}_ships set $key = $key + '$give_to_user' where ship_id = $user_ship[ship_id]");
 						$planet[$key] = $set_to;
-						dbn("update ${db_name}_planets set $key = '$set_to' where planet_id = $user[on_planet]");
+						dbn("update {$db_name}_planets set $key = '$set_to' where planet_id = $user[on_planet]");
 					}
 					empty_bays($user_ship); #ensure things are kept up to date.
 
@@ -867,7 +867,7 @@ if(isset($destroy)) {
 							$planet['alloc_fight'] = 0;
 							$planet['alloc_elect'] = 0;
 							$planet['alloc_organ'] = 0;
-							dbn("update ${db_name}_planets set alloc_fight = 0, alloc_elect=0, alloc_organ=0 where planet_id = '$user[on_planet]'");
+							dbn("update {$db_name}_planets set alloc_fight = 0, alloc_elect=0, alloc_organ=0 where planet_id = '$user[on_planet]'");
 							$out .= "<p>As you took away some colonists, any remaining colonists assigned to production duties have become idle.";
 						}
 					}
@@ -897,8 +897,8 @@ if(isset($destroy)) {
 			} elseif($amount > ($user_ship[max_shields] - $user_ship[shields])) { // can have that many
 				$output_str .= "Your ship can not hold that many Shields.<p>";
 			} else {
-				dbn("update ${db_name}_planets set shield_charge = shield_charge - $amount where planet_id = $user[on_planet]");
-				dbn("update ${db_name}_ships set shields = shields + $amount where ship_id = $user[ship_id]");
+				dbn("update {$db_name}_planets set shield_charge = shield_charge - $amount where planet_id = $user[on_planet]");
+				dbn("update {$db_name}_ships set shields = shields + $amount where ship_id = $user[ship_id]");
 				$user_ship[shields] += $amount;
 			}
 		}
@@ -916,8 +916,8 @@ if(isset($destroy)) {
 				$output_str .= "There is not <b>$amount</b> shields on your ship.<p>";
 		} elseif(($amount + $planet[shield_charge]) > ($planet[shield_gen] * 1000)) { // no more space on planet
 		} else {
-				dbn("update ${db_name}_planets set shield_charge = shield_charge + $amount where planet_id = $user[on_planet]");
-				dbn("update ${db_name}_ships set shields = shields - $amount where ship_id = $user[ship_id]");
+				dbn("update {$db_name}_planets set shield_charge = shield_charge + $amount where planet_id = $user[on_planet]");
+				dbn("update {$db_name}_ships set shields = shields - $amount where ship_id = $user[ship_id]");
 				$user_ship[shields] -= $amount;
 			}
 		}
@@ -950,7 +950,7 @@ if(isset($destroy)) {
 		$output_str .= "This action will expend at least 1 turn.";
 	} elseif($do_all == 2){ #leave goods
 		#get ship info of ships that are valid.
-		db("select sum($tech_mat) as goods, count(ship_id) as ship_count from ${db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && $tech_mat > 0");
+		db("select sum($tech_mat) as goods, count(ship_id) as ship_count from {$db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && $tech_mat > 0");
 		$results = dbr();
 
 		$turn_cost = ceil($results['ship_count'] * 0.75);
@@ -965,14 +965,14 @@ if(isset($destroy)) {
 		} elseif($sure != "yes") { #confirmation
 			get_var("Leave all $text_mat",'planet.php',"Are you sure you want to leave all the <b class=b1>$text_mat</b>(<b>$results[goods]</b>) from the <b>$results[ship_count]</b> ships with it on in this system onto the planet below, at a cost of <b>$turn_cost</b> turns?",'sure','yes');
 		} else {
-			dbn("update ${db_name}_planets set $tech_mat = $tech_mat + '$results[goods]' where planet_id = '$user[on_planet]'");
-			dbn("update ${db_name}_ships set $tech_mat = 0 where login_id = '$user[login_id]' && location = '$planet_loc' && $tech_mat > 0");
+			dbn("update {$db_name}_planets set $tech_mat = $tech_mat + '$results[goods]' where planet_id = '$user[on_planet]'");
+			dbn("update {$db_name}_ships set $tech_mat = 0 where login_id = '$user[login_id]' && location = '$planet_loc' && $tech_mat > 0");
 			charge_turns($turn_cost);
 			$user_ship[$tech_mat] = 0;
 			empty_bays($user_ship);
 			$output_str .= "<b>$results[ship_count]</b> ships unloaded at a cost of <b>$turn_cost</b> turns.";
 
-			db("select * from ${db_name}_planets where planet_id = '$planet_id'");
+			db("select * from {$db_name}_planets where planet_id = '$planet_id'");
 			$planet = dbr(1);
 		}
 	} elseif($do_all == 1){ #taking the goods
@@ -985,9 +985,9 @@ if(isset($destroy)) {
 		} elseif($planet[$tech_mat] < 1) { #can't take stuff if there isn't any to take
 			$output_str.= "This planet has no <b class=b1>$text_mat</b> on it.";
 		} elseif($type == 0){ #fighters
-			db2("select ship_id,(max_fighters - fighters) as free,ship_name from ${db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && (max_fighters - fighters) > 0 order by free desc");
+			db2("select ship_id,(max_fighters - fighters) as free,ship_name from {$db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && (max_fighters - fighters) > 0 order by free desc");
 		} elseif($type != 0) {
-			db2("select ship_id, (cargo_bays - metal - fuel - elect - organ - colon) as free, ship_name from ${db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && (cargo_bays - metal - fuel - elect - organ - colon) > 0 order by free desc");
+			db2("select ship_id, (cargo_bays - metal - fuel - elect - organ - colon) as free, ship_name from {$db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && (cargo_bays - metal - fuel - elect - organ - colon) > 0 order by free desc");
 		}
 
 		$ships = dbr2();
@@ -1001,7 +1001,7 @@ if(isset($destroy)) {
 				if($ships['free'] < ($planet[$tech_mat] - $taken)) {
 					$ship_counter++;
 					if($sure == "yes"){ #only run during the real thing.
-						dbn("update ${db_name}_ships set $tech_mat = $tech_mat + $ships[free] where ship_id = '$ships[ship_id]'");
+						dbn("update {$db_name}_ships set $tech_mat = $tech_mat + $ships[free] where ship_id = '$ships[ship_id]'");
 						$out .= "<br><b class=b1>$ships[ship_name]</b>s bays were supplemented by <b>$ships[free]</b> <b class=b1>$text_mat</b> to maximum capacity.";
 						if($ships['ship_id'] == $user_ship['ship_id'] && $type == 0){ #update user ship
 							$user_ship['fighters'] = $user_ship['max_fighters'];
@@ -1025,7 +1025,7 @@ if(isset($destroy)) {
 					$ship_counter++;
 					$t868 = $ships[$tech_mat] + ($planet[$tech_mat] - $taken);
 					if($sure == "yes"){ #only run during the real thing.
-						dbn("update ${db_name}_ships set $tech_mat = '$t868' where ship_id = '$ships[ship_id]'");
+						dbn("update {$db_name}_ships set $tech_mat = '$t868' where ship_id = '$ships[ship_id]'");
 
 						$out .= "<br><b class=b1>$ships[ship_name]</b>s bays were supplemented by <b>$t868</b> <b class=b1>$text_mat</b>";
 
@@ -1050,14 +1050,14 @@ if(isset($destroy)) {
 			} elseif($sure != "yes") {
 				get_var('Load all ships','planet.php',$turns_txt."Are you sure you want to load <b>$ship_counter</b> ships in this system with <b>$taken</b> <b class=b1>$text_mat</b> at a cost of about <b>$turn_cost</b> turns?",'sure','yes');
 			} else {
-				dbn("update ${db_name}_planets set $tech_mat = $tech_mat - $taken where planet_id = '$user[on_planet]'");
+				dbn("update {$db_name}_planets set $tech_mat = $tech_mat - $taken where planet_id = '$user[on_planet]'");
 				charge_turns($turn_cost);
 
 				if($type == 1){ #colonists
 					$planet['alloc_fight'] = 0;
 					$planet['alloc_elect'] = 0;
 					$planet['alloc_organ'] = 0;
-					dbn("update ${db_name}_planets set alloc_fight = 0, alloc_elect=0, alloc_organ=0 where planet_id = '$user[on_planet]'");
+					dbn("update {$db_name}_planets set alloc_fight = 0, alloc_elect=0, alloc_organ=0 where planet_id = '$user[on_planet]'");
 					$out .= "<p>As you took away some colonists, any remaining colonists assigned to production duties have become idle.";
 				}
 
@@ -1079,13 +1079,13 @@ if(isset($destroy)) {
 	} elseif($planet[shield_charge] < 1) {
 		print_page("Error","This planet has no shield charges on it.");
 	} else {
-		db2("select ship_id,shields,max_shields,ship_name from ${db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && max_shields > 0 && shields < max_shields");
+		db2("select ship_id,shields,max_shields,ship_name from {$db_name}_ships where login_id = '$user[login_id]' && location = '$planet_loc' && max_shields > 0 && shields < max_shields");
 		while($ships = dbr2()) {
 			//planet can charge ship w/ spare shields maybe.
 			$free = $ships[max_shields] - $ships[shields];
 			if($free <= ($planet[shield_charge] - $taken)) {
 				$ship_counter++;
-				dbn("update ${db_name}_ships set shields = max_shields where ship_id = '$ships[ship_id]'");
+				dbn("update {$db_name}_ships set shields = max_shields where ship_id = '$ships[ship_id]'");
 				$out .= "<br><b class=b1>$ships[ship_name]</b> had its shields increased by <b>$free</b> to full.";
 				if($ships[ship_id] == $user_ship[ship_id]){
 					$user_ship[shields] = $user_ship[max_shields];
@@ -1095,7 +1095,7 @@ if(isset($destroy)) {
 			} elseif($free >= ($planet[shield_charge] - $taken)) {
 				$ship_counter++;
 				$t868 = $ships[shields] + ($planet[shield_charge] - $taken);
-				dbn("update ${db_name}_ships set shields = '$t868' where ship_id = '$ships[ship_id]'");
+				dbn("update {$db_name}_ships set shields = '$t868' where ship_id = '$ships[ship_id]'");
 				if($ships[ship_id] == $user_ship[ship_id]){
 					$user_ship[shields] = $t868;
 				}
@@ -1107,7 +1107,7 @@ if(isset($destroy)) {
 				break;
 			}
 		}
-		dbn("update ${db_name}_planets set shield_charge = shield_charge - $taken where planet_id = '$user[on_planet]'");
+		dbn("update {$db_name}_planets set shield_charge = shield_charge - $taken where planet_id = '$user[on_planet]'");
 		if($ship_counter > 0){
 				charge_turns(3);
 			print_page("Shields Charged","<b>$ship_counter</b> ships had their shields charged by the planet <b class=b1>$planet[planet_name]</b>:<br>".$out);
@@ -1137,7 +1137,7 @@ if(isset($destroy)) {
 			$num_pop_set_1 = idle_colonists() + $planet['alloc_fight'];
 		}
 		$planet['alloc_fight'] = $num_pop_set_1;
-		dbn("update ${db_name}_planets set alloc_fight = $num_pop_set_1 where planet_id = $user[on_planet]");
+		dbn("update {$db_name}_planets set alloc_fight = $num_pop_set_1 where planet_id = $user[on_planet]");
 	}
 
 	if($num_pop_set_2 >= 0 && $num_pop_set_2 != $planet['alloc_elect']) { // Electronics
@@ -1145,7 +1145,7 @@ if(isset($destroy)) {
 			$num_pop_set_2 = idle_colonists() + $planet['alloc_elect'];
 		}
 		$planet['alloc_elect'] = $num_pop_set_2;
-		dbn("update ${db_name}_planets set alloc_elect = $num_pop_set_2 where planet_id = $user[on_planet]");
+		dbn("update {$db_name}_planets set alloc_elect = $num_pop_set_2 where planet_id = $user[on_planet]");
 	}
 
 	if($num_pop_set_3 >= 0 && $num_pop_set_3 != $planet['alloc_organ']) { // Organics
@@ -1153,13 +1153,13 @@ if(isset($destroy)) {
 			$num_pop_set_3 = idle_colonists() + $planet['alloc_organ'];
 		}
 		$planet['alloc_organ'] = $num_pop_set_2;
-		dbn("update ${db_name}_planets set alloc_organ = $num_pop_set_3 where planet_id = $user[on_planet]");
+		dbn("update {$db_name}_planets set alloc_organ = $num_pop_set_3 where planet_id = $user[on_planet]");
 
 	}
 
 	if($set_tax_rate >= 0 && $set_tax_rate <= 20) { // tax rate within boundaries
 		$planet['tax_rate'] = $set_tax_rate;
-		dbn("update ${db_name}_planets set tax_rate = $set_tax_rate where planet_id = $user[on_planet]");
+		dbn("update {$db_name}_planets set tax_rate = $set_tax_rate where planet_id = $user[on_planet]");
 	}
 
 } elseif(isset($monetary)){
@@ -1176,12 +1176,12 @@ if(isset($destroy)) {
 			$take_from_user = $set_cash - $planet['cash'];
 			take_cash($take_from_user);
 			$planet['cash'] = $set_cash;
-			dbn("update ${db_name}_planets set cash = $set_cash where planet_id = $user[on_planet]");
+			dbn("update {$db_name}_planets set cash = $set_cash where planet_id = $user[on_planet]");
 		} else { #taking money from planet.
 			$give_to_user = $planet['cash'] - $set_cash;
 			give_cash($give_to_user);
 			$planet['cash'] = $set_cash;
-			dbn("update ${db_name}_planets set cash = $set_cash where planet_id = $user[on_planet]");
+			dbn("update {$db_name}_planets set cash = $set_cash where planet_id = $user[on_planet]");
 		}
 	}
 
@@ -1198,25 +1198,25 @@ if(isset($destroy)) {
 				$take_from_user = $set_tech - $planet['tech'];
 				take_tech($take_from_user);
 				$planet['tech'] = $set_tech;
-				dbn("update ${db_name}_planets set tech = $set_tech where planet_id = $user[on_planet]");
+				dbn("update {$db_name}_planets set tech = $set_tech where planet_id = $user[on_planet]");
 			} else { #taking money from planet.
 				$give_to_user = $planet['tech'] - $set_tech;
 				give_tech($give_to_user);
 				$planet['tech'] = $set_tech;
-				dbn("update ${db_name}_planets set tech = $set_tech where planet_id = $user[on_planet]");
+				dbn("update {$db_name}_planets set tech = $set_tech where planet_id = $user[on_planet]");
 			}
 		}
 	}
 
 } elseif(isset($set_rep) && $set_rep >=0 && $set_rep <= 2) {
-	dbn("update ${db_name}_planets set daily_report = '$set_rep' where planet_id = $user[on_planet]");
+	dbn("update {$db_name}_planets set daily_report = '$set_rep' where planet_id = $user[on_planet]");
 	$planet['daily_report'] = $set_rep;
 
 } elseif(isset($mil) && $mil == 1){ #offensive/defensive planet.
 
 	$flag = 1;
 
-	db("select login_id from ${db_name}_ships where location = '$planet[location]' && (clan_id != '$planet[clan_id]' && clan_id > 0) && login_id != '$user[login_id]'");
+	db("select login_id from {$db_name}_ships where location = '$planet[location]' && (clan_id != '$planet[clan_id]' && clan_id > 0) && login_id != '$user[login_id]'");
 	$ships = dbr();
 	db(attack_planet_check($db_name,$user));
 	$planet_check = dbr();
@@ -1226,13 +1226,13 @@ if(isset($destroy)) {
 	}
 
 	if($flag) {
-		dbn("update ${db_name}_planets set fighter_set = $mil where planet_id = $user[on_planet]");
+		dbn("update {$db_name}_planets set fighter_set = $mil where planet_id = $user[on_planet]");
 		$planet['fighter_set'] = 1;
 	} else {
 		$output_str .= "Planet unable to go into attack mode with enemy ships in star system, or with an enemy hostile planet in the system.<p>";
 	}
 } elseif(isset($mil) && $mil == 0) {
-	dbn("update ${db_name}_planets set fighter_set = $mil where planet_id = $user[on_planet]");
+	dbn("update {$db_name}_planets set fighter_set = $mil where planet_id = $user[on_planet]");
 	$planet['fighter_set'] = 0;
 }
 
@@ -1246,9 +1246,9 @@ if(isset($rename)){
 			print_page("Invalid Name","That is not a valid name. Must have more than three characters.");
 		}
 		#$stuff = addslashes($name_to);
-		#echo eregi_replace("'","",$name_to);
+		#echo str_replace("'","",$name_to);
 		$text .= "Planet re-named from <b class=b1>$planet[planet_name]</b> to <b class=b1>$name_to</b>.";
-		dbn("update ${db_name}_planets set planet_name = '$name_to' where planet_id = '$planet[planet_id]'");
+		dbn("update {$db_name}_planets set planet_name = '$name_to' where planet_id = '$planet[planet_id]'");
 		post_news("<b class=b1>$user[login_name]</b> renamed the planet <b class=b1>$planet[planet_name]</b> to <b class=b1>$name_to</b>.");
 	} else {
 		$text .= "Enter a new name for the planet (30 Characters Max):";
@@ -1414,7 +1414,7 @@ if($has_pass == 1) {
 	}
 
 
-	db("select * from ${db_name}_planets where planet_id = '$user[on_planet]'");
+	db("select * from {$db_name}_planets where planet_id = '$user[on_planet]'");
 	$planet = dbr(1);
 
 	if(($user['login_id'] == $planet['login_id'] || $user['clan_id'] == $planet['clan_id']) && ($uv_planets < 0 || $user['terra_imploder'] > 0)) {

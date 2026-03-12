@@ -14,7 +14,7 @@ if($user['login_id'] != ADMIN_ID && ($user['login_id'] != OWNER_ID && OWNER_ID !
 	$max = 5000;
 }
 
-db("select count(entry_id) from ${db_name}_diary where login_id = $user[login_id]");
+db("select count(entry_id) from {$db_name}_diary where login_id = $user[login_id]");
 $num_ent = dbr();
 
 $rs = "<p><a href=$PHP_SELF>Back to Diary</a><br>";
@@ -50,25 +50,25 @@ if(isset($add_ent) || isset($log_ent)){
 
 
 	if(isset($log_ent)){//entry coming in from a log.
-		db("select text,sender_name from ${db_name}_messages where message_id = '$log_ent' && (login_id = '$user[login_id]' || login_id < 0)");
+		db("select text,sender_name from {$db_name}_messages where message_id = '$log_ent' && (login_id = '$user[login_id]' || login_id < 0)");
 		$message_text = dbr(1);
 		$add_ent = "$message_text[sender_name]\n\n\n$message_text[text]";
 	}
 	$add_ent = addslashes($add_ent);
-	dbn("insert into ${db_name}_diary (timestamp,login_id, entry) values(".time().",'$user[login_id]','$add_ent')");
+	dbn("insert into {$db_name}_diary (timestamp,login_id, entry) values(".time().",'$user[login_id]','$add_ent')");
 	$text .= "Message Successfully Copied to Diary.<p>";
 }
 
 
 //Deletes
 if(isset($delete)) { //delete single
-	dbn("delete from ${db_name}_diary where entry_id='$delete' && login_id = '$user[login_id]'");
+	dbn("delete from {$db_name}_diary where entry_id='$delete' && login_id = '$user[login_id]'");
 } elseif(isset($delete_all)){ //delete all
 	if(!isset($sure)) {
 		get_var('Delete all','diary.php',"Are you sure you want to delete all entries in your diary?",'sure','yes');
 		$rs = "<a href=$PHP_SELF>Back to Diary</a>";
 	} else{
-		dbn("delete from ${db_name}_diary where login_id = '$user[login_id]'");
+		dbn("delete from {$db_name}_diary where login_id = '$user[login_id]'");
 		$text .= "Diary Successfully Emptied.<p>";
 		$rs = "<a href=$PHP_SELF>Back to Diary</a>";
 	}
@@ -81,8 +81,8 @@ if(isset($delete)) { //delete single
 			$del_str .= "entry_id = '$value' || ";
 		}
 		$del_str = preg_replace("/\|\| $/", "", $del_str);
-		dbn("delete from ${db_name}_diary where login_id = '$user[login_id]' && (".$del_str.")");
-		$num_del = mysql_affected_rows();
+		dbn("delete from {$db_name}_diary where login_id = '$user[login_id]' && (".$del_str.")");
+		$num_del = mysqli_affected_rows($GLOBALS['database_link']);
 		$text .= "<b>$num_del</b> Entries(s) Deleted.<p>";
 	}
 }
@@ -90,7 +90,7 @@ if(isset($delete)) { //delete single
 
 //Edits
 if(isset($edit)){//edit screen
-	db("select * from ${db_name}_diary where entry_id = '$edit' && login_id = '$user[login_id]'");
+	db("select * from {$db_name}_diary where entry_id = '$edit' && login_id = '$user[login_id]'");
 	$entry = dbr(1);
 	$entry_txt = stripslashes($entry['entry']);
 	$text .= "<FORM method=POST action=diary.php>";
@@ -102,7 +102,7 @@ if(isset($edit)){//edit screen
 
 } elseif(isset($edit2)){//saving edited entry
 	$edit_ent = addslashes($edit_ent);
-	dbn("update ${db_name}_diary set entry = '$edit_ent' where entry_id='$edit2' && login_id = '$user[login_id]'");
+	dbn("update {$db_name}_diary set entry = '$edit_ent' where entry_id='$edit2' && login_id = '$user[login_id]'");
 	$text .= "Entry Successfully Changed.<p>";
 }
 
@@ -111,7 +111,7 @@ if(isset($edit)){//edit screen
 //Lists
 
 //Top of front diary page
-db("select count(entry_id) from ${db_name}_diary where login_id = '$user[login_id]'");
+db("select count(entry_id) from {$db_name}_diary where login_id = '$user[login_id]'");
 $num_ent = dbr();
 $text .= "You may store up to <b>$max</b> entries in this Diary. <br>There are presently <b>$num_ent[0]</b> entries in your diary.";
 if($user['login_id'] == ADMIN_ID){
@@ -142,7 +142,7 @@ if(!$num_ent[0]){//no entries in diary
 		$text .= "<FORM method=POST action=diary.php name=quick_del><input type=hidden name=del_select value=1>";
 	}
 
-	db2("select * from ${db_name}_diary where login_id = '$user[login_id]' order by timestamp desc");
+	db2("select * from {$db_name}_diary where login_id = '$user[login_id]' order by timestamp desc");
 
 	while($entry = dbr2(1)) {//list entries
 		$entry['entry'] = mcit($entry['entry']);

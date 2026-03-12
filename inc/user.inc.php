@@ -21,7 +21,7 @@ if($login_id != 1){
 	$game_info = dbr(1);
 }
 
-db("select * from ${db_name}_users where login_id = '$login_id'");
+db("select * from {$db_name}_users where login_id = '$login_id'");
 $user = dbr(1);
 
 if (!(is_array($game_info) && is_array($user))) { // Ensure game and user actually exists
@@ -141,8 +141,8 @@ function statusBar()
 			$menu .= "<p><em>$s_turns</b> safe turn(s) left</em></p>\n";
 		} else {
 			$menu .= "<p><em>Leaving</em> newbie safety!</p>\n";
-			dbn("update ${db_name}_users set turns_run = turns_run + 1 where login_id = '$user[login_id]'");
-			dbn("insert into ${db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values('".time()."','$user[login_name]','$user[login_id]','$user[login_id]','You have just left Newbie safety.<p>This means that you are now attackable by any player who can attack. <p>Good Luck.')");
+			dbn("update {$db_name}_users set turns_run = turns_run + 1 where login_id = '$user[login_id]'");
+			dbn("insert into {$db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values('".time()."','$user[login_name]','$user[login_id]','$user[login_id]','You have just left Newbie safety.<p>This means that you are now attackable by any player who can attack. <p>Good Luck.')");
 		}
 	}
 
@@ -199,12 +199,12 @@ function statusBar()
 
 	$menu .= "\t<li><a href=\"player_stat.php\">Player Ranking</a></li>\n</ul>\n<ul>\n";
 
-	db("select count(message_id) from ${db_name}_messages where login_id = " . $user['login_id']);
+	db("select count(message_id) from {$db_name}_messages where login_id = " . $user['login_id']);
 	list($counted) = dbr();
 
 	$menu .= "\t<li><a href=\"mpage.php\">$counted Message" . ($counted === 1 ? '' : 's') . "</a></li><li><a href=\"message.php\">Send Message</a></li>\n";
 
-	db("select count(message_id) as new_messages from ${db_name}_messages where timestamp > '$user[last_access_forum]' && login_id = -1 && sender_id != '$user[login_id]'");
+	db("select count(message_id) as new_messages from {$db_name}_messages where timestamp > '$user[last_access_forum]' && login_id = -1 && sender_id != '$user[login_id]'");
 	$messg_count_forum = dbr();
 	$temp_forum_text = "";
 	if($messg_count_forum['new_messages'] > 0){
@@ -216,7 +216,7 @@ function statusBar()
 	if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 
 		if($user['login_id'] == ADMIN_ID){
-			db("select last_access_admin_forum from se_games where db_name = '${db_name}'");
+			db("select last_access_admin_forum from se_games where db_name = '{$db_name}'");
 			$l_view = dbr();
 			$time_from = $l_view['last_access_admin_forum'];
 		} else {
@@ -233,7 +233,7 @@ function statusBar()
 	if ($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 		$menu .= "\t<li><a href=\"forum.php?clan_forum=1\">Clan Forums</a></li>\n";
 	} elseif($user['clan_id'] > 0) {
-		db("select count(message_id) as new_messages from ${db_name}_messages where timestamp > '$user[last_access_clan_forum]' && login_id = -5 && clan_id = '$user[clan_id]' && sender_id != '$user[login_id]'");
+		db("select count(message_id) as new_messages from {$db_name}_messages where timestamp > '$user[last_access_clan_forum]' && login_id = -5 && clan_id = '$user[clan_id]' && sender_id != '$user[login_id]'");
 		$messg_count_clan_forum = dbr();
 		$temp_clan_forum_text_var = "";
 		if($messg_count_clan_forum['new_messages'] > 0){
@@ -328,7 +328,7 @@ function charge_turns($amount)
 	}
 
 	$amount = round($amount);
-	dbn("update ${db_name}_users set turns = turns - '$amount', turns_run = turns_run + '$amount' where login_id = '$user[login_id]'");
+	dbn("update {$db_name}_users set turns = turns - '$amount', turns_run = turns_run + '$amount' where login_id = '$user[login_id]'");
 	$user['turns'] -= $amount;
 	$user['turns_run'] += $amount;
 }
@@ -339,7 +339,7 @@ function give_cash($amount)
 {
 	global $db_name,$user;
 	if ($user['login_id'] != ADMIN_ID) {
-		dbn("update ${db_name}_users set cash = cash + '$amount' where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set cash = cash + '$amount' where login_id = '$user[login_id]'");
 		$user['cash'] += $amount;
 	}
 }
@@ -349,7 +349,7 @@ function take_cash($amount)
 {
 	global $db_name,$user;
 	if ($user['login_id'] != ADMIN_ID) {
-		dbn("update ${db_name}_users set cash = cash - '$amount' where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set cash = cash - '$amount' where login_id = '$user[login_id]'");
 		$user['cash'] -= $amount;
 	}
 }
@@ -360,7 +360,7 @@ function take_tech($amount)
 {
 	global $db_name,$user;
 	if ($user['login_id'] != ADMIN_ID) {
-		dbn("update ${db_name}_users set tech = tech - '$amount' where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set tech = tech - '$amount' where login_id = '$user[login_id]'");
 		$user['tech'] -= $amount;
 	}
 }
@@ -370,7 +370,7 @@ function give_tech($amount)
 {
 	global $db_name,$user;
 	if ($user['login_id'] != ADMIN_ID) {
-		dbn("update ${db_name}_users set tech = tech + '$amount' where login_id = '$user[login_id]'");
+		dbn("update {$db_name}_users set tech = tech + '$amount' where login_id = '$user[login_id]'");
 		$user['tech'] += $amount;
 	}
 }
@@ -385,9 +385,9 @@ function send_message($to,$text)
 {
 	global $db_name,$user;
 	if($to == -5 && $user['clan_id'] > 0){//message to the clan
-		dbn("insert into ${db_name}_messages (timestamp,sender_name, sender_id, login_id, text, clan_id) values(".time().",'$user[login_name]','$user[login_id]','$to','$text','$user[clan_id]')");
+		dbn("insert into {$db_name}_messages (timestamp,sender_name, sender_id, login_id, text, clan_id) values(".time().",'$user[login_name]','$user[login_id]','$to','$text','$user[clan_id]')");
 	} else {
-		dbn("insert into ${db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values(".time().",'$user[login_name]','$user[login_id]','$to','$text')");
+		dbn("insert into {$db_name}_messages (timestamp,sender_name, sender_id, login_id, text) values(".time().",'$user[login_name]','$user[login_id]','$to','$text')");
 	}
 }
 
@@ -483,7 +483,7 @@ function print_messages($full)
 	}
 
 	if($gForum) {
-		db("select count(message_id) from ${db_name}_messages where login_id = -1 && timestamp < '$last_time'");
+		db("select count(message_id) from {$db_name}_messages where login_id = -1 && timestamp < '$last_time'");
 		$num_mes_prev = dbr();
 		$msgStr .= empty($num_mes_prev[0]) ? "<p>End of Forum</p>" : "<p><a href=\"forum.php?last_time=$last_time&prevdays=yes\">Previous $user_options[forum_back] Hours</a></p>";
 	}
@@ -528,7 +528,7 @@ function print_name($player)
 	static $cache = array();
 
 	if (!isset($cache[$player['login_name']])) {//this user not cached
-		db2("select u.login_id, u.login_name, u.clan_id, u.clan_sym_color, u.clan_sym from ${db_name}_users u where u.login_id = '$player[login_id]'");
+		db2("select u.login_id, u.login_name, u.clan_id, u.clan_sym_color, u.clan_sym from {$db_name}_users u where u.login_id = '$player[login_id]'");
 		$player = dbr2(1);
 
 		$cache[$player['login_name']] = formatName($player['login_id'],
@@ -551,7 +551,7 @@ function damage_ship($amount,$fig_dam,$s_dam,$from,$target,$target_ship) {
 		if($target_ship['shields'] < 0){
 			$target_ship['shields'] == 0;
 		}
-		dbn("update ${db_name}_ships set shields = shields - '$s_dam' where ship_id = '$target_ship[ship_id]'");
+		dbn("update {$db_name}_ships set shields = shields - '$s_dam' where ship_id = '$target_ship[ship_id]'");
 	}
 
 	//take the fighters down next (if needed).
@@ -560,7 +560,7 @@ function damage_ship($amount,$fig_dam,$s_dam,$from,$target,$target_ship) {
 		if($target_ship['fighters'] < 0){
 			$target_ship['fighters'] == 0;
 		}
-		dbn("update ${db_name}_ships set fighters = fighters - '$fig_dam' where ship_id = '$target_ship[ship_id]'");
+		dbn("update {$db_name}_ships set fighters = fighters - '$fig_dam' where ship_id = '$target_ship[ship_id]'");
 	}
 
 	//don't want to hurt the admin now do we?
@@ -581,23 +581,23 @@ function damage_ship($amount,$fig_dam,$s_dam,$from,$target,$target_ship) {
 		if($amount >= $target_ship['fighters'] || $amount < 0) {	//destroy ship
 			//Minerals go to the system
 			if($from['location'] != 1 && ($target_ship['fuel'] > 0 || $target_ship['metal']) > 0){
-				dbn("update ${db_name}_stars set fuel = fuel + ".round($target_ship['fuel']*(mt_rand(20,80)/100)).", metal = metal + ".round($target_ship[metal]*(mt_rand(40,90)/100))." where star_id = $target_ship[location]");
+				dbn("update {$db_name}_stars set fuel = fuel + ".round($target_ship['fuel']*(mt_rand(20,80)/100)).", metal = metal + ".round($target_ship[metal]*(mt_rand(40,90)/100))." where star_id = $target_ship[location]");
 			}
 
-			dbn("delete from ${db_name}_ships where ship_id = '$target_ship[ship_id]'");
-			dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$target_ship[fighters]', ships_killed = ships_killed + '1', ships_killed_points = ships_killed_points + '$target_ship[point_value]' where login_id = '$from[login_id]'");
+			dbn("delete from {$db_name}_ships where ship_id = '$target_ship[ship_id]'");
+			dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$target_ship[fighters]', ships_killed = ships_killed + '1', ships_killed_points = ships_killed_points + '$target_ship[point_value]' where login_id = '$from[login_id]'");
 
-			dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$target_ship[fighters]', ships_lost = ships_lost + '1', ships_lost_points = ships_lost_points + '$target_ship[point_value]' where login_id = '$target[login_id]'");
+			dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$target_ship[fighters]', ships_lost = ships_lost + '1', ships_lost_points = ships_lost_points + '$target_ship[point_value]' where login_id = '$target[login_id]'");
 
 			if (stristr($target_ship['class_name'], "escape") !== false) { // escape pod lost
-				dbn("update ${db_name}_users set location = 1, ship_id = NULL, last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
+				dbn("update {$db_name}_users set location = 1, ship_id = NULL, last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
 				return 1;
 			} else { // normal ship lost
 				if($target['ship_id'] != $target_ship['ship_id']) {
 					$new_ship_id = $target['ship_id'];
 
 				} else {
-					db("select ship_id from ${db_name}_ships where login_id = '$target_ship[login_id]' LIMIT 1");
+					db("select ship_id from {$db_name}_ships where login_id = '$target_ship[login_id]' LIMIT 1");
 					$other_ship = dbr();
 
 					if(!empty($other_ship['ship_id'])) { // jump to other ship
@@ -610,20 +610,20 @@ function damage_ship($amount,$fig_dam,$s_dam,$from,$target,$target_ship) {
 				// set ships_killed
 
 				if($target['login_id'] > 5) {
-					db("select location from ${db_name}_ships where ship_id = '$new_ship_id'");
+					db("select location from {$db_name}_ships where ship_id = '$new_ship_id'");
 					$other_ship = dbr(1);
 				} else {
 					$other_ship['location'] = 1;
 				}
 
-				dbn("update ${db_name}_users set ship_id = '$new_ship_id', location = '$other_ship[location]', last_attack =".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
+				dbn("update {$db_name}_users set ship_id = '$new_ship_id', location = '$other_ship[location]', last_attack =".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
 			}
 			return 1;
 		} else { // ship not destroyed
-			dbn("update ${db_name}_users set last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
-			dbn("update ${db_name}_ships set fighters = fighters - '$amount', shields = shields - '$shield_damage' where ship_id = '$target_ship[ship_id]'");
-			dbn("update ${db_name}_users set fighters_lost = fighters_lost + '$amount' where login_id = '$target[login_id]'");
-			dbn("update ${db_name}_users set fighters_killed = fighters_killed + '$amount' where login_id = '$from[login_id]'");
+			dbn("update {$db_name}_users set last_attack = ".time().", last_attack_by = '$from[login_name]' where login_id = '$target[login_id]'");
+			dbn("update {$db_name}_ships set fighters = fighters - '$amount', shields = shields - '$shield_damage' where ship_id = '$target_ship[ship_id]'");
+			dbn("update {$db_name}_users set fighters_lost = fighters_lost + '$amount' where login_id = '$target[login_id]'");
+			dbn("update {$db_name}_users set fighters_killed = fighters_killed + '$amount' where login_id = '$from[login_id]'");
 		}
 	}
 
@@ -640,17 +640,17 @@ function retire_user($target)
 		return false;
 	}
 
-	db("select login_name from ${db_name}_users where login_id = '$target'");
+	db("select login_name from {$db_name}_users where login_id = '$target'");
 	$target_user = dbr(1);
 
 	post_news("<b class=b1>$target_user[login_name]</b> Retired from the Game.");
-	dbn("delete from ${db_name}_ships where login_id = $target");
-	dbn("update ${db_name}_bilkos set bidder_id = 0, timestamp = ".time()." where bidder_id = $target");
-	dbn("update ${db_name}_planets set login_name = 'Retired Player', login_id=0, pass='' where login_id = '$target'");
-	dbn("delete from ${db_name}_diary where login_id = $target");
-	dbn("delete from ${db_name}_user_options where login_id = $target");
-	dbn("delete from ${db_name}_users where login_id = $target");
-	dbn("update ${db_name}_politics set login_id = 0, login_name = 0, timestamp = 0 where login_id = '$target'");
+	dbn("delete from {$db_name}_ships where login_id = $target");
+	dbn("update {$db_name}_bilkos set bidder_id = 0, timestamp = ".time()." where bidder_id = $target");
+	dbn("update {$db_name}_planets set login_name = 'Retired Player', login_id=0, pass='' where login_id = '$target'");
+	dbn("delete from {$db_name}_diary where login_id = $target");
+	dbn("delete from {$db_name}_user_options where login_id = $target");
+	dbn("delete from {$db_name}_users where login_id = $target");
+	dbn("update {$db_name}_politics set login_id = 0, login_name = 0, timestamp = 0 where login_id = '$target'");
 
 	return true;
 }
@@ -675,7 +675,7 @@ function get_star_dist($s1,$s2) {
 	if(!isset($s1) || !isset($s2)){
 		return 0;
 	}
-	db("select x_loc,y_loc from ${db_name}_stars where star_id = '$s1' || star_id = '$s2'");
+	db("select x_loc,y_loc from {$db_name}_stars where star_id = '$s1' || star_id = '$s2'");
 	$star1 = dbr(1);
 	$star2 = dbr(1);
 	$dist = round(sqrt(abs(($star1['x_loc'] - $star2['x_loc']) * 2) + abs(($star1['y_loc'] - $star2['y_loc'])*2)));
@@ -687,7 +687,7 @@ function sudden_death_check($user)
 {
 	global $sudden_death,$db_name,$rs;
 	if ($sudden_death && $user['login_id'] != ADMIN_ID && $user['login_id'] != OWNER_ID) {
-		db("select count(ship_id) from ${db_name}_ships where login_id = '$user[login_id]'");
+		db("select count(ship_id) from {$db_name}_ships where login_id = '$user[login_id]'");
 		$numships = dbr();
 		if ($numships[0] <= 0) {
 			print_page("Sudden Death", "You have no ship, and this game is Sudden Death. <br>As such you are out of the game. <br>You may still access the Forum, and send/recieve private messages though.");
@@ -711,7 +711,7 @@ function random_system_num()
 
 	return (int)$sys['star_id'];
 
-	/*db("select count(star_id) from ${db_name}_stars");
+	/*db("select count(star_id) from {$db_name}_stars");
 	$total = dbr();
 	return round(mt_rand(1,$total[0]));*/
 }
@@ -729,11 +729,11 @@ function create_escape_pod($target)
 #	$rand_star = 1;
 	$ship_types = load_ship_types(); #load ship data
 	$ship_stats = $ship_types[2]; #ep is num 2
-	$q_string = "insert into ${db_name}_ships (ship_name, login_id, login_name, shipclass, class_name, class_name_abbr, fighters, max_fighters, max_shields, cargo_bays, mine_rate_metal, mine_rate_fuel, move_turn_cost, location, config,clan_id";
+	$q_string = "insert into {$db_name}_ships (ship_name, login_id, login_name, shipclass, class_name, class_name_abbr, fighters, max_fighters, max_shields, cargo_bays, mine_rate_metal, mine_rate_fuel, move_turn_cost, location, config,clan_id";
 	$q_string .= ") values('Escape Pod',$target[login_id],'$target[login_name]',2,'$ship_stats[name]','$ship_stats[class_abbr]',$ship_stats[fighters],$ship_stats[max_fighters],$ship_stats[max_shields],$ship_stats[cargo_bays],$ship_stats[mine_rate_metal],$ship_stats[mine_rate_fuel],$ship_stats[move_turn_cost],$rand_star,'$ship_stats[config]','$target[clan_id]')";
 	dbn($q_string);
 	$ship_id = db_insert_id();
-	dbn("update ${db_name}_users set location = '$rand_star', ship_id ='$ship_id' where login_id = '$target[login_id]'");
+	dbn("update {$db_name}_users set location = '$rand_star', ship_id ='$ship_id' where login_id = '$target[login_id]'");
 	$target['location'] = $rand_star;
 	$target['ship_id'] = $ship_id;
 	return $target;
@@ -744,7 +744,7 @@ function create_escape_pod($target)
 //function that returns a hostile planet checking query
 function attack_planet_check($db_name,$user)
 {
-	return "select * from ${db_name}_planets where fighter_set = 1 && fighters > 0 && login_id != '$user[login_id]' && (clan_id != '$user[clan_id]' && clan_id != 0) && location = '$user[location]' order by fighter_set desc, fighters desc limit 1";
+	return "select * from {$db_name}_planets where fighter_set = 1 && fighters > 0 && login_id != '$user[login_id]' && (clan_id != '$user[clan_id]' && clan_id != 0) && location = '$user[location]' order by fighter_set desc, fighters desc limit 1";
 }
 
 
@@ -755,7 +755,7 @@ function load_ship_types()
 	global $db_name, $fighter_cost_earth;
 	$ship_types = array();
 
-	db("select * from ${db_name}_ship_types where auction != 1 order by type_id");
+	db("select * from {$db_name}_ship_types where auction != 1 order by type_id");
 
 	while($this_type = dbr(1)) {
 		$this_type['cost'] += $this_type['fighters'] * $fighter_cost_earth;
@@ -814,7 +814,7 @@ function message_all_players($text, $game_db, $recipients, $sender)
 {
 	global $user;
 
-	db2("select login_id from ${game_db}_users");
+	db2("select login_id from {$game_db}_users");
 	while($players = dbr2(1)) {
 		dbn("insert into {$game_db}_messages (timestamp,sender_name, sender_id, login_id, text) values(".time().",'$user[login_name]','$user[login_id]','$players[login_id]','Message to <b class=b1>$recipients</b> from $sender:<p> $text')");
 	}
@@ -841,7 +841,7 @@ function make_standard_upgrade($upgrade_str, $config_addon, $cost,
 		take_cash($cost);
 		take_tech($tech_cost);
 		$user_ship['config'] .= ":".$config_addon;
-		dbn("update ${db_name}_ships set config = '$user_ship[config] ', upgrades = upgrades - 1 where ship_id = '$user[ship_id]'");
+		dbn("update {$db_name}_ships set config = '$user_ship[config] ', upgrades = upgrades - 1 where ship_id = '$user[ship_id]'");
 		--$user_ship['upgrades'];
 
 		return "<b class=b1>$upgrade_str</b>, purchased and fitted to the <b class=b1>$user_ship[ship_name]</b> for <b>$cost</b> Credits.<p>";
@@ -877,7 +877,7 @@ function fill_fleet($item_sql, $item_max_sql, $item_str, $item_cost, $script_nam
 	}
 
 	//elect all viable ships
-	db("select sum($sql_max_check) as total_capacity, count(ship_id) as total_ships from ${db_name}_ships where ".$sql_where_clause);
+	db("select sum($sql_max_check) as total_capacity, count(ship_id) as total_ships from {$db_name}_ships where ".$sql_where_clause);
 	$maths = dbr(1);
 
 	//insufficient cash
@@ -895,7 +895,7 @@ function fill_fleet($item_sql, $item_max_sql, $item_str, $item_cost, $script_nam
 			if(empty($sure)){ //confirmation
 				get_var('Load ships',$script_name,"There is capacity for <b>$maths[total_capacity]</b> <b class=b1>$item_str</b> in <b>$maths[total_ships]</b> ships in this system. <p>You have enough money to fill all the ships with <b class=b1>$item_str</b>. Do you wish to do that?",'sure','yes');
 			} else { //process.
-				dbn("update ${db_name}_ships set $item_sql = $item_max_sql where ".$sql_where_clause);
+				dbn("update {$db_name}_ships set $item_sql = $item_max_sql where ".$sql_where_clause);
 				take_cash($total_cost);
 
 				if($cargo_run == 0){ //not cargo bay stuff
@@ -931,7 +931,7 @@ function fill_fleet($item_sql, $item_max_sql, $item_str, $item_cost, $script_nam
 				$fill_ships_sql = ""; //intiate sql string to load a bunch of ships at once
 				$temp_str = "";
 
-				db2("select ship_id, $item_sql, $item_max_sql as max, ship_name from ${db_name}_ships where ".$sql_where_clause." order by $item_max_sql $order_dir");
+				db2("select ship_id, $item_sql, $item_max_sql as max, ship_name from {$db_name}_ships where ".$sql_where_clause." order by $item_max_sql $order_dir");
 
 				while($ships = dbr2(1)) { //loop through the ships
 
@@ -953,7 +953,7 @@ function fill_fleet($item_sql, $item_max_sql, $item_str, $item_cost, $script_nam
 						}
 
 					} else { //cannot load ship whole ship.
-						dbn("update ${db_name}_ships set $item_sql = $item_sql + '$used_copy_afford' where ship_id = '$ships[ship_id]'");
+						dbn("update {$db_name}_ships set $item_sql = $item_sql + '$used_copy_afford' where ship_id = '$ships[ship_id]'");
 
 						if($ships['ship_id'] == $user_ship['ship_id'] && $cargo_run == 0){ //do the user ship too.
 							$user_ship[$item_sql] += $used_copy_afford;
@@ -970,7 +970,7 @@ function fill_fleet($item_sql, $item_max_sql, $item_str, $item_cost, $script_nam
 				//update DB with fully loaded ships.
 				if(!empty($fill_ships_sql)){
 					$fill_ships_sql = preg_replace("/\|\| $/", "", $fill_ships_sql);
-					dbn("update ${db_name}_ships set $item_sql = $item_max_sql where ".$fill_ships_sql);
+					dbn("update {$db_name}_ships set $item_sql = $item_max_sql where ".$fill_ships_sql);
 				}
 				take_cash($final_cost); //charge the cash
 			}

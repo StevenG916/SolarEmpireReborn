@@ -27,7 +27,7 @@ if (isset($_REQUEST['game_selected'])) {
 	$db_name = $game_db['db_name'];
 
 	//see if the user is already in the game
-	db("select game_login_count, banned_time, banned_reason from ${db_name}_users where login_id = '$login_id'");
+	db("select game_login_count, banned_time, banned_reason from {$db_name}_users where login_id = '$login_id'");
 	$in_game = dbr(1);
 
 	//user logging into selected game. update the db, and redirect to location.php
@@ -56,7 +56,7 @@ if (isset($_REQUEST['game_selected'])) {
 		header('Location: location.php');
 		exit();
 	} else { //user joining selected game
-		db("select count(login_id) from ${db_name}_users where login_id = '$login_id'");
+		db("select count(login_id) from {$db_name}_users where login_id = '$login_id'");
 		$check_count = dbr();
 
 		db("select * from se_games where db_name = '$db_name'");
@@ -113,7 +113,7 @@ if (isset($_REQUEST['game_selected'])) {
 
 			//validate proposed username
 			$in_game_name = trim((string)$_POST['in_game_name']);
-			if((strcmp($in_game_name,htmlspecialchars($in_game_name))) || (strlen($in_game_name) < 3) || (eregi("[^a-z0-9~!@#$%&*_+-=��������׀�� ]",$in_game_name))) {
+			if((strcmp($in_game_name,htmlspecialchars($in_game_name))) || (strlen($in_game_name) < 3) || (preg_match('/[^a-z0-9~!@#$%&*_+=\-ÆÐ×÷Þàéîð×Ø ]/i', $in_game_name))) {
 				print_header("New Account - $game_info[name]");
 				echo "Invalid login name. No slashes, no spaces and minimum of three characters.";
 				echo "<p><a href=javascript:history.back()>Back to Joining Form</a>";
@@ -122,7 +122,7 @@ if (isset($_REQUEST['game_selected'])) {
 			}
 
 			#determine if that username is already in user by another player in the game, or another player as a server name.
-			db("select pu.login_name, u.login_name as alternate_name from ${db_name}_users u, user_accounts pu where u.login_id != '$p_user[login_id]' && pu.login_id != '$p_user[login_id]' && (u.login_name = '$in_game_name' || pu.login_name = '$in_game_name')");
+			db("select pu.login_name, u.login_name as alternate_name from {$db_name}_users u, user_accounts pu where u.login_id != '$p_user[login_id]' && pu.login_id != '$p_user[login_id]' && (u.login_name = '$in_game_name' || pu.login_name = '$in_game_name')");
 			$test_name = dbr(1);
 			if($test_name['login_name'] || $test_name['alternate_name']){
 				print_header("Choose Username");
@@ -155,15 +155,15 @@ if (isset($_REQUEST['game_selected'])) {
 
 
 			//create user account within game
-			dbn("insert into ${db_name}_users (login_id, login_name, joined_game, turns, cash, ship_id, location, tech) VALUES ('$p_user[login_id]', '$in_game_name', '".time()."', '$start_turns', '$start_cash', '$ship_id', '1', '$start_tech')");
+			dbn("insert into {$db_name}_users (login_id, login_name, joined_game, turns, cash, ship_id, location, tech) VALUES ('$p_user[login_id]', '$in_game_name', '".time()."', '$start_turns', '$start_cash', '$ship_id', '1', '$start_tech')");
 
 			//insert user options
-			dbn("insert ${db_name}_user_options (login_id, show_sigs, show_config, show_clan_ships) VALUES('$p_user[login_id]','$show_sigs','$show_config','$show_clan_ships')");
+			dbn("insert {$db_name}_user_options (login_id, show_sigs, show_config, show_clan_ships) VALUES('$p_user[login_id]','$show_sigs','$show_config','$show_clan_ships')");
 
 			//send the intro message (if there is one to send).
 			if(!empty($game_info['intro_message'])){
 				$game_info['intro_message'] = nl2br($game_name['intro_message']);
-				dbn("insert into ${db_name}_messages (sender_id,sender_name,text,login_id,timestamp) values ('1','Admin','$game_name[intro_message]','$p_user[login_id]','".time()."')");
+				dbn("insert into {$db_name}_messages (sender_id,sender_name,text,login_id,timestamp) values ('1','Admin','$game_name[intro_message]','$p_user[login_id]','".time()."')");
 			}
 
 			insert_history($login_id, "Joined Game");
@@ -196,11 +196,11 @@ if (isset($_REQUEST['game_selected'])) {
 	$unjoined = array();
 
 	//cycle through the games that are running.
-	$games = mysql_query('SELECT `name`, `db_name`, `paused`, `game_id` FROM `se_games` WHERE `status` = \'1\' ORDER BY `name` ASC');
-	while ($game = mysql_fetch_row($games)) {
-		$inGame = mysql_query('SELECT COUNT(*) FROM `' . $game[1] .
-		 '_users` WHERE `login_id` = ' . (int)$p_user['login_id']);
-		if (mysql_result($inGame, 0) > 0) { //player already in that game
+	db('SELECT `name`, `db_name`, `paused`, `game_id` FROM `se_games` WHERE `status` = \'1\' ORDER BY `name` ASC');
+	while ($game = dbr(0)) {
+		db2('SELECT COUNT(*) FROM `' . $game[1] . '_users` WHERE `login_id` = ' . (int)$p_user['login_id']);
+		$inGame = dbr2(0);
+		if ($inGame[0] > 0) { //player already in that game
 			$joined[] = $game;
 		} else { //player not in that game.
 			$unjoined[] = $game;
@@ -219,9 +219,9 @@ if (isset($_REQUEST['game_selected'])) {
 			if ($game[2] == 1) {
 				?> (paused)<?php
 			} else {
-				$sd = mysql_query('SELECT `value` FROM `' . $game[1] .
-				 '_db_vars` WHERE `name` = \'sudden_death\'');
-				if (mysql_result($sd, 0) == 1) {
+				db2('SELECT `value` FROM `' . $game[1] . '_db_vars` WHERE `name` = \'sudden_death\'');
+				$sd = dbr2(0);
+				if ($sd[0] == 1) {
 					?> (sudden death)<?php
 				}
 			}
@@ -244,9 +244,9 @@ if (isset($_REQUEST['game_selected'])) {
 			if ($game[2] == 1) {
 				?> (paused)<?php
 			} else {
-				$sd = mysql_query('SELECT `value` FROM `' . $game[1] .
-				 '_db_vars` WHERE `name` = \'sudden_death\'');
-				if (mysql_result($sd, 0) == 1) {
+				db2('SELECT `value` FROM `' . $game[1] . '_db_vars` WHERE `name` = \'sudden_death\'');
+				$sd = dbr2(0);
+				if ($sd[0] == 1) {
 					?> (sudden death)<?php
 				}
 			}

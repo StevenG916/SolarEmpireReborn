@@ -18,7 +18,7 @@ Requirements: Must have the most Kestrals.
 #Main Senator page.
 $text .= "Listed below are the Senators. These are players who are the most powerful in a certain field.<p>";
 $text .= "<b><font color=lime>The politics area of the game is <b>FAR</b> from finished</font></b><br>At present Senators don't do anything, other than have a nice title.<p>";
-db("select timestamp,position_id,login_name,login_id from ${db_name}_politics where login_id > '0' order by login_id");
+db("select timestamp,position_id,login_name,login_id from {$db_name}_politics where login_id > '0' order by login_id");
 $polit = dbr(1);
 if ($polit) {
   $text .= make_table(array("Since","Position","Holder"));

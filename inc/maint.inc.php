@@ -7,7 +7,7 @@ if (!preg_match('/c[lg]i/i', php_sapi_name())) {
 require_once('config.inc.php');
 
 error_reporting(E_ALL);
-mt_srand((double)microtime() * 0x7FFFFFF);
+mt_srand();
 
 header('Content-Type: text/plain');
 

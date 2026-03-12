@@ -72,9 +72,9 @@ function search_the_db($term,$can_do_stop,$db_to_search,$search_page,$field_in_d
 
 		//add to sql_query text.
 		if($c1 > 0){ //determine if already got an entry in query. If so, then need an ||.
-			$sql_query .= "|| ${field_in_db} REGEXP '$value'";
+			$sql_query .= "|| {$field_in_db} REGEXP '$value'";
 		} else {
-			$sql_query .= " ${field_in_db} REGEXP '$value'";
+			$sql_query .= " {$field_in_db} REGEXP '$value'";
 		}
 		if($db_to_search == "diary"){
 			$sql_query .= "&& login_id = '$user[login_id]'";
@@ -84,7 +84,7 @@ function search_the_db($term,$can_do_stop,$db_to_search,$search_page,$field_in_d
 	} //end foreach of search terms
 
 	//the mysql query which finds the results
-	db("select timestamp,${field_in_db} from ${db_name}_${db_to_search} where".$sql_query." order by timestamp desc");
+	db("select timestamp,{$field_in_db} from {$db_name}_{$db_to_search} where".$sql_query." order by timestamp desc");
 	$news = dbr();
 
 	$primary_counter = 0; //used to ensure goes around for each keyword;
@@ -102,7 +102,7 @@ function search_the_db($term,$can_do_stop,$db_to_search,$search_page,$field_in_d
 			if(preg_match("/".preg_quote($value)."/i",$search_results_text[$primary_counter])) {
 				$search_results_finds[$primary_counter]++;
 				$search_results_score[$primary_counter] += (substr_count(strtolower($search_results_text[$primary_counter]), $value) -1) * 2;
-				$search_results_text[$primary_counter] = eregi_replace("$value","<font color=lime>$value</font>",$search_results_text[$primary_counter]);
+				$search_results_text[$primary_counter] = preg_replace('/' . preg_quote($value, '/') . '/i', "<font color=lime>$value</font>", $search_results_text[$primary_counter]);
 			}
 		}
 
@@ -124,7 +124,7 @@ function search_the_db($term,$can_do_stop,$db_to_search,$search_page,$field_in_d
 		//stopwords where removed
 		if ($stop_words_removed > 0){
 			$stop_search_txt = urlencode($term);
-			$ret_str .= "<i>Stop-words</i> were removed from your search. These consisted of: <b>".$stop_str."</b>.<br>Click <a href=${search_page}.php?term=$stop_search_txt&can_do_stop=1>here</a> to run a search with the stop-words included.<p>";
+			$ret_str .= "<i>Stop-words</i> were removed from your search. These consisted of: <b>".$stop_str."</b>.<br>Click <a href={$search_page}.php?term=$stop_search_txt&can_do_stop=1>here</a> to run a search with the stop-words included.<p>";
 		}
 		$num = 0; //keep track of where in the arrays the system is.
 
@@ -132,7 +132,7 @@ function search_the_db($term,$can_do_stop,$db_to_search,$search_page,$field_in_d
 		$ret_str .= make_table(array("",""));
 
 		//cycle through the results for the final output.
-		while($var = each($search_results_text)) {
+		foreach($search_results_text as $var_key => $var_value) {
 			if($num == 0){//first result, determine how many of the keywords where found.
 				$keep_track = $search_results_finds[$num];
 				$k_temp_tracker = count($keywords);
@@ -149,7 +149,7 @@ function search_the_db($term,$can_do_stop,$db_to_search,$search_page,$field_in_d
 				break;
 			}
 
-			$ret_str .= quick_row("<b>".date("M d - H:i",$search_results_timestamp[$num]),$var[1]);
+			$ret_str .= quick_row("<b>".date("M d - H:i",$search_results_timestamp[$num]),$var_value);
 			$num++;
 		}
 		//end table, then return results.
@@ -177,7 +177,7 @@ if(isset($term)) {
 
 }
 
-db("select count(*) from ${db_name}_news");
+db("select count(*) from {$db_name}_news");
 $news_ents = dbr(0);
 
 if (!isset($news_posts_show)) {
@@ -185,7 +185,7 @@ if (!isset($news_posts_show)) {
 }
 
 if (!isset($prev)) {
-	db("select * from ${db_name}_news order by timestamp desc LIMIT 0, $news_posts_show");
+	db("select * from {$db_name}_news order by timestamp desc LIMIT 0, $news_posts_show");
 	$text .= "Last <b>$news_posts_show</b> posts to the news.<br>";
 	$prev2 = $news_posts_show;
 	$prev = $news_posts_show;
@@ -194,7 +194,7 @@ if (!isset($prev)) {
 	$prev2 = $prev + $news_posts_show;
 	$text .= "<a href=news.php?prev=$prev3>Back to posts $prev3 to $prev</a><p>";
 	$text .= "Posts $prev to $prev2 of the news.<br>";
-	db("select * from ${db_name}_news order by timestamp desc LIMIT $prev, $news_posts_show");
+	db("select * from {$db_name}_news order by timestamp desc LIMIT $prev, $news_posts_show");
 }
 
 

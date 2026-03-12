@@ -19,7 +19,7 @@ if ($target == -2 && (!isset($clan_id) || $clan_id <= 0)) {
 	print_page("Admin Forum","You are not an Admin.");
 } elseif(empty($text)) {
 	if ($target > 0) {
-		db("select login_name,login_id,clan_sym,clan_sym_color from ${db_name}_users where login_id = $target");
+		db("select login_name,login_id,clan_sym,clan_sym_color from {$db_name}_users where login_id = $target");
 		$rec = dbr();
 		$rec = print_name($rec);
 	} elseif($target== -1){
@@ -38,7 +38,7 @@ if ($target == -2 && (!isset($clan_id) || $clan_id <= 0)) {
 		$ostr = "Send Message to:<br><br>";
 		$ostr .= "<form name=\"get_var_form\" action=\"{$_SERVER['SCRIPT_NAME']}\" method=\"post\">";
 		$ostr .= "<select name = 'target'>";
-		db("select * from ${db_name}_users where login_id != '$login_id' order by login_name");
+		db("select * from {$db_name}_users where login_id != '$login_id' order by login_name");
 		while ($info2 = dbr()) {
 			$ostr .= "<option value = '$info2[login_id]'>$info2[login_name]";
 		}
@@ -52,9 +52,9 @@ if ($target == -2 && (!isset($clan_id) || $clan_id <= 0)) {
 	if($reply_to && $target > 0){#reply to with original text
 		$rs .= "<br><a href=mpage.php>Back to Message Page</a>";
 		if($user[login_id] == -1){
-			db("select text from ${db_name}_messages where message_id = '$reply_to' && login_id = '-1'");
+			db("select text from {$db_name}_messages where message_id = '$reply_to' && login_id = '-1'");
 		} else {
-			db("select text from ${db_name}_messages where message_id = '$reply_to' && (login_id = -1 || login_id=$user[login_id] || (login_id = -5 && clan_id = $user[clan_id]))");
+			db("select text from {$db_name}_messages where message_id = '$reply_to' && (login_id = -1 || login_id=$user[login_id] || (login_id = -5 && clan_id = $user[clan_id]))");
 		}
 		$reply_to = dbr();
 		$reply_to[text] = stripslashes($reply_to[text]);
@@ -82,7 +82,7 @@ if ($target == -2 && (!isset($clan_id) || $clan_id <= 0)) {
 
 #send message
 	if($target==-2) {
-		db2("select login_id from ${db_name}_users where clan_id='$clan_id' && clan_id > 0");
+		db2("select login_id from {$db_name}_users where clan_id='$clan_id' && clan_id > 0");
 		$target_member = dbr2(1);
 		while($target_member) {
 			send_message($target_member['login_id'],$text);
@@ -104,7 +104,7 @@ if ($target == -2 && (!isset($clan_id) || $clan_id <= 0)) {
 			$game_name['name'] = "(Server Admin)";
 			$sender_name = $user['login_name'];
 		} else {
-			db("select admin_name, name from se_games where db_name = '${db_name}'");
+			db("select admin_name, name from se_games where db_name = '{$db_name}'");
 			$game_name = dbr(1);
 			$game_name['name'] = "(Admin: $game_name[name])";
 			$sender_name = $game_name['admin_name'];

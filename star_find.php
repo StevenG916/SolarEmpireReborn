@@ -9,13 +9,13 @@ if(!isset($sys1) || !isset($sys2)) {
 //Connect to the database
 db_connect();
 
-db("select x_loc,y_loc from ${db_name}_stars where star_id = " . (int)$sys1);
+db("select x_loc,y_loc from {$db_name}_stars where star_id = " . (int)$sys1);
 $star_one = dbr();
 
-db("select x_loc,y_loc from ${db_name}_stars where star_id = " . (int)$sys2);
+db("select x_loc,y_loc from {$db_name}_stars where star_id = " . (int)$sys2);
 $star_two = dbr();
 
-db("select value from ${db_name}_db_vars where name = 'uv_universe_size '");
+db("select value from {$db_name}_db_vars where name = 'uv_universe_size '");
 $size_record = dbr();
 $size = $size_record[value] + 50;
 

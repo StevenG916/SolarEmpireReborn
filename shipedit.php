@@ -9,7 +9,7 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 		$cur_ship = null;
 		$info = null;
 
-		db("SELECT * FROM ${db_name}_ship_types WHERE type_id != 1 ORDER BY type_id");
+		db("SELECT * FROM {$db_name}_ship_types WHERE type_id != 1 ORDER BY type_id");
 
 		$out .= make_table(array("Name","Cost","Tech Cost","Fighters","Shields","Cargo Cap","Mine Rate","Configuration","Upgrade Pods","Base Move Cost","Point Value","From","Action"));
 
@@ -49,7 +49,7 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 		} else {
 			$auction = 0;
 		}
-		dbn("INSERT INTO ${db_name}_ship_types VALUES ('', '$name', '$type', '$class_abbr', '$cost', '$tcost', '$fighters', '$max_fighters', '$max_shields', '$cargo_bays', '0', '$mining_rate', '$descr', '$size', '$config', '$upgrades', '$auction', '$move_turn_cost', '$point_value', '$num_pc', '$num_ot', '$num_dt', '$num_sa', '$num_ew')");
+		dbn("INSERT INTO {$db_name}_ship_types VALUES ('', '$name', '$type', '$class_abbr', '$cost', '$tcost', '$fighters', '$max_fighters', '$max_shields', '$cargo_bays', '0', '$mining_rate', '$descr', '$size', '$config', '$upgrades', '$auction', '$move_turn_cost', '$point_value', '$num_pc', '$num_ot', '$num_dt', '$num_sa', '$num_ew')");
 		$out = "<script>window.location=(\"$PHP_SELF?editshiptype=-1\");</script>";
 		print_page("Adding Ship",$out);
 
@@ -91,26 +91,26 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 	} elseif($editshiptype < -2) {
 		$editshiptype = abs($editshiptype);
 
-		dbn("DELETE FROM ${db_name}_ship_types WHERE type_id = $editshiptype");
+		dbn("DELETE FROM {$db_name}_ship_types WHERE type_id = $editshiptype");
 		$out = "<script>window.location=(\"$PHP_SELF?editshiptype=-1\");</script>";
 
 		print_page("Removing Ship", $out);
 
 	//Code to modify ship in database and redirect
 	} elseif($editshiptype > 0 && isset($submit)) {
-		dbn("DELETE FROM ${db_name}_ship_types WHERE type_id = ".$editshiptype);
+		dbn("DELETE FROM {$db_name}_ship_types WHERE type_id = ".$editshiptype);
 		if(isset($auction)) {
 			$auction = 1;
 		} else {
 			$auction = 0;
 		}
-		dbn("INSERT INTO ${db_name}_ship_types VALUES ('', '$name', '$type', '$class_abbr', '$cost', '$tcost', '$fighters', '$max_fighters', '$max_shields', '$cargo_bays', '0', '$mining_rate', 'addslashes($descr)', '$size', '$config', '$upgrades', '$auction', '$move_turn_cost', '$point_value', '$num_pc', '$num_ot', '$num_dt', '$num_sa', '$num_ew')");
+		dbn("INSERT INTO {$db_name}_ship_types VALUES ('', '$name', '$type', '$class_abbr', '$cost', '$tcost', '$fighters', '$max_fighters', '$max_shields', '$cargo_bays', '0', '$mining_rate', 'addslashes($descr)', '$size', '$config', '$upgrades', '$auction', '$move_turn_cost', '$point_value', '$num_pc', '$num_ot', '$num_dt', '$num_sa', '$num_ew')");
 		$out = "<script>window.location=(\"$PHP_SELF?editshiptype=-1\");</script>";
 		print_page("Adding Ship",$out);
 
 	//Code to create form to modify ship
 	} elseif($editshiptype > 0) {
-		db("SELECT * FROM ${db_name}_ship_types WHERE type_id = ".$editshiptype);
+		db("SELECT * FROM {$db_name}_ship_types WHERE type_id = ".$editshiptype);
 		$defaults=dbr(1);
 
 		$out = "

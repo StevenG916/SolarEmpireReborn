@@ -10,39 +10,39 @@ if($user[login_id] != 1) {
 $rs = "<p><a href=admin.php>Back to Admin Page</a>";
 
 if(isset($fixcols)) {
-	dbn("update ${db_name}_planets set colon = '100000' where colon = '2147483647'");
+	dbn("update {$db_name}_planets set colon = '100000' where colon = '2147483647'");
 }
 
 if(isset($cut)) {
-	dbn("update ${db_name}_stars set link_1 = 0 where star_id = $s1 && link_1 = $s2");
-	dbn("update ${db_name}_stars set link_2 = 0 where star_id = $s1 && link_2 = $s2");
-	dbn("update ${db_name}_stars set link_3 = 0 where star_id = $s1 && link_3 = $s2");
-	dbn("update ${db_name}_stars set link_4 = 0 where star_id = $s1 && link_4 = $s2");
-	dbn("update ${db_name}_stars set link_5 = 0 where star_id = $s1 && link_5 = $s2");
-	dbn("update ${db_name}_stars set link_6 = 0 where star_id = $s1 && link_6 = $s2");
+	dbn("update {$db_name}_stars set link_1 = 0 where star_id = $s1 && link_1 = $s2");
+	dbn("update {$db_name}_stars set link_2 = 0 where star_id = $s1 && link_2 = $s2");
+	dbn("update {$db_name}_stars set link_3 = 0 where star_id = $s1 && link_3 = $s2");
+	dbn("update {$db_name}_stars set link_4 = 0 where star_id = $s1 && link_4 = $s2");
+	dbn("update {$db_name}_stars set link_5 = 0 where star_id = $s1 && link_5 = $s2");
+	dbn("update {$db_name}_stars set link_6 = 0 where star_id = $s1 && link_6 = $s2");
 
-	dbn("update ${db_name}_stars set link_1 = 0 where star_id = $s2 && link_1 = $s1");
-	dbn("update ${db_name}_stars set link_2 = 0 where star_id = $s2 && link_2 = $s1");
-	dbn("update ${db_name}_stars set link_3 = 0 where star_id = $s2 && link_3 = $s1");
-	dbn("update ${db_name}_stars set link_4 = 0 where star_id = $s2 && link_4 = $s1");
-	dbn("update ${db_name}_stars set link_5 = 0 where star_id = $s2 && link_5 = $s1");
-	dbn("update ${db_name}_stars set link_6 = 0 where star_id = $s2 && link_6 = $s1");
+	dbn("update {$db_name}_stars set link_1 = 0 where star_id = $s2 && link_1 = $s1");
+	dbn("update {$db_name}_stars set link_2 = 0 where star_id = $s2 && link_2 = $s1");
+	dbn("update {$db_name}_stars set link_3 = 0 where star_id = $s2 && link_3 = $s1");
+	dbn("update {$db_name}_stars set link_4 = 0 where star_id = $s2 && link_4 = $s1");
+	dbn("update {$db_name}_stars set link_5 = 0 where star_id = $s2 && link_5 = $s1");
+	dbn("update {$db_name}_stars set link_6 = 0 where star_id = $s2 && link_6 = $s1");
 }
 
 if(isset($add)) {
-	dbn("update ${db_name}_stars set link_1 = $s2 where star_id = $s1 && link_1 = 0");
-	dbn("update ${db_name}_stars set link_2 = $s2 where star_id = $s1 && link_2 = 0 && link_1 != $s2");
-	dbn("update ${db_name}_stars set link_3 = $s2 where star_id = $s1 && link_3 = 0 && link_1 != $s2 && link_2 != $s2");
-	dbn("update ${db_name}_stars set link_4 = $s2 where star_id = $s1 && link_4 = 0 && link_1 != $s2 && link_2 != $s2 && link_3 != $s2");
-	dbn("update ${db_name}_stars set link_5 = $s2 where star_id = $s1 && link_5 = 0 && link_1 != $s2 && link_2 != $s2 && link_3 != $s2 && link_4 != $s2");
-	dbn("update ${db_name}_stars set link_6 = $s2 where star_id = $s1 && link_6 = 0 && link_1 != $s2 && link_2 != $s2 && link_3 != $s2 && link_4 != $s2 && link_5 != $s2");
+	dbn("update {$db_name}_stars set link_1 = $s2 where star_id = $s1 && link_1 = 0");
+	dbn("update {$db_name}_stars set link_2 = $s2 where star_id = $s1 && link_2 = 0 && link_1 != $s2");
+	dbn("update {$db_name}_stars set link_3 = $s2 where star_id = $s1 && link_3 = 0 && link_1 != $s2 && link_2 != $s2");
+	dbn("update {$db_name}_stars set link_4 = $s2 where star_id = $s1 && link_4 = 0 && link_1 != $s2 && link_2 != $s2 && link_3 != $s2");
+	dbn("update {$db_name}_stars set link_5 = $s2 where star_id = $s1 && link_5 = 0 && link_1 != $s2 && link_2 != $s2 && link_3 != $s2 && link_4 != $s2");
+	dbn("update {$db_name}_stars set link_6 = $s2 where star_id = $s1 && link_6 = 0 && link_1 != $s2 && link_2 != $s2 && link_3 != $s2 && link_4 != $s2 && link_5 != $s2");
 
-	dbn("update ${db_name}_stars set link_1 = $s1 where star_id = $s2 && link_1 = 0");
-	dbn("update ${db_name}_stars set link_2 = $s1 where star_id = $s2 && link_2 = 0 && link_1 != $s1");
-	dbn("update ${db_name}_stars set link_3 = $s1 where star_id = $s2 && link_3 = 0 && link_1 != $s1 && link_2 != $s1");
-	dbn("update ${db_name}_stars set link_4 = $s1 where star_id = $s2 && link_4 = 0 && link_1 != $s1 && link_2 != $s1 && link_3 != $s1");
-	dbn("update ${db_name}_stars set link_5 = $s1 where star_id = $s2 && link_5 = 0 && link_1 != $s1 && link_2 != $s1 && link_3 != $s1 && link_4 != $s1");
-	dbn("update ${db_name}_stars set link_6 = $s1 where star_id = $s2 && link_6 = 0 && link_1 != $s1 && link_2 != $s1 && link_3 != $s1 && link_4 != $s1 && link_5 != $s1");
+	dbn("update {$db_name}_stars set link_1 = $s1 where star_id = $s2 && link_1 = 0");
+	dbn("update {$db_name}_stars set link_2 = $s1 where star_id = $s2 && link_2 = 0 && link_1 != $s1");
+	dbn("update {$db_name}_stars set link_3 = $s1 where star_id = $s2 && link_3 = 0 && link_1 != $s1 && link_2 != $s1");
+	dbn("update {$db_name}_stars set link_4 = $s1 where star_id = $s2 && link_4 = 0 && link_1 != $s1 && link_2 != $s1 && link_3 != $s1");
+	dbn("update {$db_name}_stars set link_5 = $s1 where star_id = $s2 && link_5 = 0 && link_1 != $s1 && link_2 != $s1 && link_3 != $s1 && link_4 != $s1");
+	dbn("update {$db_name}_stars set link_6 = $s1 where star_id = $s2 && link_6 = 0 && link_1 != $s1 && link_2 != $s1 && link_3 != $s1 && link_4 != $s1 && link_5 != $s1");
 }
 
 
