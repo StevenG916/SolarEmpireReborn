@@ -91,7 +91,7 @@ if(isset($more_money)){
 
 #news post
 if(isset($post_game_news) && empty($text)) {
-	get_var('Post News',$PHP_SELF,'What do you want to post in the News?','text','');
+	get_var('Post News',$_SERVER['PHP_SELF'],'What do you want to post in the News?','text','');
 } elseif(isset($post_game_news)) {
 	$text = addslashes($text);
 	$login_id = -1;
@@ -125,7 +125,7 @@ if (isset($show_active)) {
 #admin sets difficulty
 if(isset($difficulty)){
 	if(!isset($set_dif)){
-		$out = "This will have no effect upon the game itself, but will serve simply to inform new joiners to the game what to expect.<form action=$PHP_SELF name=get_dif_form method=POST>
+		$out = "This will have no effect upon the game itself, but will serve simply to inform new joiners to the game what to expect.<form action=$_SERVER['PHP_SELF'] name=get_dif_form method=POST>
 		<p><input type=radio name=set_dif value=1>Begginer
 		<br><input type=radio name=set_dif value=2>Begginer -> Intermediate
 		<br><input type=radio name=set_dif value=3>Intermediate
@@ -149,7 +149,7 @@ if(isset($ban)){
 		if(!$ban_target || $ban_target < 1 || !$ban_time){
 			db("select login_name,login_id from {$db_name}_users where banned_time <= " .
 			 time() . " && banned_time != -1 order by login_name");
-			$out .= "Notes:<br>Number of hours you may ban a player for is limited to $max_time, which is 1 week (7 days).<br>Setting a ban-time of -1 means the ban time will last until the game is reset.<br>You may reset a ban period at any time from this page.<FORM action=$PHP_SELF method=POST name=ban_form>";
+			$out .= "Notes:<br>Number of hours you may ban a player for is limited to $max_time, which is 1 week (7 days).<br>Setting a ban-time of -1 means the ban time will last until the game is reset.<br>You may reset a ban period at any time from this page.<FORM action=$_SERVER['PHP_SELF'] method=POST name=ban_form>";
 			$out .= "Select Player to Ban: <br><br>";
 			$out .= "<select name=ban_target>";
 			$out .= "<option value=0>Select player... ";
@@ -170,7 +170,7 @@ if(isset($ban)){
 					$ban_reason = addslashes($ban_reason);
 				}
 				$rs="";
-				get_var('Ban Player',"$PHP_SELF","Are you sure you want to ban <b class=b1>$ban_info[login_name]</b> for <b>$ban_time</b> hours?",'sure','yes');
+				get_var('Ban Player',"$_SERVER['PHP_SELF']","Are you sure you want to ban <b class=b1>$ban_info[login_name]</b> for <b>$ban_time</b> hours?",'sure','yes');
 			} else {
 				insert_history($ban_target,"Was Banned from the game for $ban_time hours");
 				if(empty($ban_reason)){
@@ -211,10 +211,10 @@ if(isset($ban)){
 		} else {
 			$temp_343 = "End of Game";
 		}
-		$b_t_out .= make_row(array(print_name($list_banned),$temp_343,"$list_banned[banned_reason]","<a href=$PHP_SELF?ban=1&unban=$list_banned[login_id]>Un-Ban</a>"));
+		$b_t_out .= make_row(array(print_name($list_banned),$temp_343,"$list_banned[banned_reason]","<a href=$_SERVER['PHP_SELF']?ban=1&unban=$list_banned[login_id]>Un-Ban</a>"));
 	}
 
-	$out .= "<a href=$PHP_SELF?ban=2>Ban a player</a><br><br>";
+	$out .= "<a href=$_SERVER['PHP_SELF']?ban=2>Ban a player</a><br><br>";
 	if(empty($b_t_out)){
 		$out .= "<br><br>No players presently banned.<br>";
 	} else {
@@ -304,7 +304,7 @@ if(isset($reset_signup)) {
 if(isset($reset)){
 	if($reset == 1){
 		$out .= "Are you sure you want to reset the game?";
-		$out .= "<center><a href=$PHP_SELF?reset=2>Yes</a>&nbsp&nbsp&nbsp&nbsp&nbsp<a href=$PHP_SELF>No</a></center>";
+		$out .= "<center><a href=$_SERVER['PHP_SELF']?reset=2>Yes</a>&nbsp&nbsp&nbsp&nbsp&nbsp<a href=$_SERVER['PHP_SELF']>No</a></center>";
 	} elseif($reset == 2) {
 		$out .= "Game reset started.<p>";
 
@@ -375,7 +375,7 @@ if(isset($planet_list) || isset($sort_planets)){
 
 	$clan_planet = dbr(1);
 	if($clan_planet) {
-		$out .= $rs.make_table(array("<a href=$PHP_SELF?sort_planets=login_name&sorted=$sorted>Planet Owner</a>","<a href=$PHP_SELF?sort_planets=planet_name&sorted=$sorted>Planet Name</a>","<a href=$PHP_SELF?sort_planets=location&sorted=$sorted>Location</a>","<a href=$PHP_SELF?sort_planets=fighters&sorted=$sorted>Fighters</a>","<a href=$PHP_SELF?sort_planets=colon&sorted=$sorted>Colonists</a>","<a href=$PHP_SELF?sort_planets=cash&sorted=$sorted>Cash</a>","<a href=$PHP_SELF?sort_planets=metal&sorted=$sorted>Metal</a>","<a href=$PHP_SELF?sort_planets=fuel&sorted=$sorted>Fuel</a>","<a href=$PHP_SELF?sort_planets=elect&sorted=$sorted>Electronics</a>","<a href=$PHP_SELF?sort_planets=organ&sorted=$sorted>Organics</a>"));
+		$out .= $rs.make_table(array("<a href=$_SERVER['PHP_SELF']?sort_planets=login_name&sorted=$sorted>Planet Owner</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=planet_name&sorted=$sorted>Planet Name</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=location&sorted=$sorted>Location</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=fighters&sorted=$sorted>Fighters</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=colon&sorted=$sorted>Colonists</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=cash&sorted=$sorted>Cash</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=metal&sorted=$sorted>Metal</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=fuel&sorted=$sorted>Fuel</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=elect&sorted=$sorted>Electronics</a>","<a href=$_SERVER['PHP_SELF']?sort_planets=organ&sorted=$sorted>Organics</a>"));
 		while($clan_planet) {
 			$clan_planet['login_name'] = "<b class=b1>$clan_planet[login_name]</b>";
 			$out .= make_row($clan_planet);
@@ -396,7 +396,7 @@ if(isset($messag)){
 		$present_mess = dbr();
 		$present_mess[0] = stripslashes($present_mess[0]);
 		$out .= "Please enter a message that all new players will recieve when they join. <p>Notes: HTML is enabled. Message codes are not used.";
-		$out .= "<form name=get_var_form action=$PHP_SELF method=POST>";
+		$out .= "<form name=get_var_form action=$_SERVER['PHP_SELF'] method=POST>";
 		$out .= "<input type=hidden name=messag value='2'>";
 		$out .= "<textarea name=new_mess cols=50 rows=20 wrap=soft>$present_mess[0]</textarea>";
 		$out .= '<p><input type=submit value=Change></form>';
@@ -416,7 +416,7 @@ if(isset($email)){
 		db("select admin_email from se_games where db_name = '$db_name'");
 		$present_mail = dbr();
 		$out .= "Please enter New Admin E-mail Address:";
-		$out .= "<form name=get_var_form action=$PHP_SELF method=POST>";
+		$out .= "<form name=get_var_form action=$_SERVER['PHP_SELF'] method=POST>";
 		$out .= "<input type=hidden name=email value='2'>";
 		$out .= "<input type=text name=new_mail value='$present_mail[0]' size=30>";
 		$out .= '<p><input type=submit value=Change></form>';
@@ -438,7 +438,7 @@ if(isset($admin_name)){
 		db("select admin_name from se_games where db_name = '$db_name'");
 		$admin_name = dbr();
 		$out .= "Please enter New Admin's Name:";
-		$out .= "<form name=get_var_form action=$PHP_SELF method=POST>";
+		$out .= "<form name=get_var_form action=$_SERVER['PHP_SELF'] method=POST>";
 		$out .= "<input type=hidden name=admin_name value='2'>";
 		$out .= "<input type=text name=new_name value='$admin_name[0]' size=30>";
 		$out .= '<p><input type=submit value=Change></form>';
@@ -458,7 +458,7 @@ if(isset($descr)){
 		db("select description from se_games where db_name = '$db_name'");
 		$present_desc = dbr();
 		$out .= "Please enter some words that explain the game.<p>Note: HTML is enabled, but does not use the message codes. <br>(Leave empty if you don't want to use it)";
-		$out .= "<form name=get_var_form action=$PHP_SELF method=POST>";
+		$out .= "<form name=get_var_form action=$_SERVER['PHP_SELF'] method=POST>";
 		$out .= "<input type=hidden name=descr value='2'>";
 		$out .= "<textarea name=new_descr cols=50 rows=20 wrap=soft>$present_desc[0]</textarea>";
 		$out .= '<p><input type=submit value=Change></form>';

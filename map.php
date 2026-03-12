@@ -46,7 +46,7 @@ if($wormholes == 1){
 	echo "Key:<br>Wormholes:<br><font color=#FFFF44>Yellow Lines</font> represent One-Way Wormholes.<br><font color=#00FF00>Green Lines</font> Show Two Way Wormholes.<p>";
 }
 
-echo $key_text;
+echo $key_text ?? '';
 echo $link_url;
 
 pageStop('Map of the known universe');

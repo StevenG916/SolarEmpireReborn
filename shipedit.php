@@ -32,14 +32,14 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 			}
 
 			if($cur_ship['type_id'] != 1 && $cur_ship['type_id'] != 2) {
-				$info['Action'] = "<a href=$PHP_SELF?editshiptype=$cur_ship[type_id]>Edit</a> - <a href=$PHP_SELF?editshiptype=-$cur_ship[type_id]>Remove</a>";
+				$info['Action'] = "<a href=$_SERVER['PHP_SELF']?editshiptype=$cur_ship[type_id]>Edit</a> - <a href=$_SERVER['PHP_SELF']?editshiptype=-$cur_ship[type_id]>Remove</a>";
 			} else {
-				$info['Action'] = "<a href=$PHP_SELF?editshiptype=$cur_ship[type_id]>Edit</a> - Remove</a>";
+				$info['Action'] = "<a href=$_SERVER['PHP_SELF']?editshiptype=$cur_ship[type_id]>Edit</a> - Remove</a>";
 			}
 			$out .= make_row($info);
 		}
 		$out .= "</table></p>";
-		$out .= "<a href=$PHP_SELF?editshiptype=-2>Add New Ship</a>";
+		$out .= "<a href=$_SERVER['PHP_SELF']?editshiptype=-2>Add New Ship</a>";
 		print_page("Ship Editor",$out);
 
 	//Add ship to db and redirect
@@ -50,7 +50,7 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 			$auction = 0;
 		}
 		dbn("INSERT INTO {$db_name}_ship_types VALUES ('', '$name', '$type', '$class_abbr', '$cost', '$tcost', '$fighters', '$max_fighters', '$max_shields', '$cargo_bays', '0', '$mining_rate', '$descr', '$size', '$config', '$upgrades', '$auction', '$move_turn_cost', '$point_value', '$num_pc', '$num_ot', '$num_dt', '$num_sa', '$num_ew')");
-		$out = "<script>window.location=(\"$PHP_SELF?editshiptype=-1\");</script>";
+		$out = "<script>window.location=(\"$_SERVER['PHP_SELF']?editshiptype=-1\");</script>";
 		print_page("Adding Ship",$out);
 
 	} elseif($editshiptype == -2) {
@@ -84,7 +84,7 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 		<input type=submit name=NewShip value=\"Create\"><br><br>
 		</form>
 		";
-		$out .= "<a href=$PHP_SELF?editshiptype=-1>Return to Ship Editor</a>";
+		$out .= "<a href=$_SERVER['PHP_SELF']?editshiptype=-1>Return to Ship Editor</a>";
 		print_page("Add New Ship", $out);
 
 	//Code to purge ship from database and redirect
@@ -92,7 +92,7 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 		$editshiptype = abs($editshiptype);
 
 		dbn("DELETE FROM {$db_name}_ship_types WHERE type_id = $editshiptype");
-		$out = "<script>window.location=(\"$PHP_SELF?editshiptype=-1\");</script>";
+		$out = "<script>window.location=(\"$_SERVER['PHP_SELF']?editshiptype=-1\");</script>";
 
 		print_page("Removing Ship", $out);
 
@@ -105,7 +105,7 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 			$auction = 0;
 		}
 		dbn("INSERT INTO {$db_name}_ship_types VALUES ('', '$name', '$type', '$class_abbr', '$cost', '$tcost', '$fighters', '$max_fighters', '$max_shields', '$cargo_bays', '0', '$mining_rate', 'addslashes($descr)', '$size', '$config', '$upgrades', '$auction', '$move_turn_cost', '$point_value', '$num_pc', '$num_ot', '$num_dt', '$num_sa', '$num_ew')");
-		$out = "<script>window.location=(\"$PHP_SELF?editshiptype=-1\");</script>";
+		$out = "<script>window.location=(\"$_SERVER['PHP_SELF']?editshiptype=-1\");</script>";
 		print_page("Adding Ship",$out);
 
 	//Code to create form to modify ship
@@ -148,7 +148,7 @@ if($user['login_id'] == ADMIN_ID || $user['login_id'] == OWNER_ID) {
 		<input type=submit name=ModShip value=\"Modify Ship\"><br><br>
 		</form>
 		";
-		$out .= "<a href=$PHP_SELF?editshiptype=-1>Return to Ship Editor</a>";
+		$out .= "<a href=$_SERVER['PHP_SELF']?editshiptype=-1>Return to Ship Editor</a>";
 		$rs = "<a href=admin.php>Back to admin page</a>";
 		print_page("Modify Ship", $out);
 	}
