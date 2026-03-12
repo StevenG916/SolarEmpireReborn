@@ -104,7 +104,7 @@ if(isset($history) && $history > 0){
 		//user only wants to list history from a certain game.
 		if(!empty($select_game)){
 			$sql_game_select = " && game_db = '$select_game' ";
-			$games_links .= "<br><a href=$_SERVER['PHP_SELF']?history=$history&select_game=>All Games</a>";
+			$games_links .= "<br><a href={$_SERVER['PHP_SELF']}?history=$history&select_game=>All Games</a>";
 		} else {
 			$select_game = "";
 		}
@@ -124,7 +124,7 @@ if(isset($history) && $history > 0){
 			//get all the games the user has been in.
 			db2("select game_db from user_history where login_id = '$history' group by game_db");
 			while($games_in = dbr2()){
-				$games_links .= "\n<br><a href=$_SERVER['PHP_SELF']?history=$history&select_game=$games_in[game_db]>$games_in[game_db]</a>";
+				$games_links .= "\n<br><a href={$_SERVER['PHP_SELF']}?history=$history&select_game=$games_in[game_db]>$games_in[game_db]</a>";
 			}
 		}
 		$text = $rs;

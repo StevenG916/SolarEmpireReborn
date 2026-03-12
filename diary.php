@@ -17,11 +17,11 @@ if($user['login_id'] != ADMIN_ID && ($user['login_id'] != OWNER_ID && OWNER_ID !
 db("select count(entry_id) from {$db_name}_diary where login_id = $user[login_id]");
 $num_ent = dbr();
 
-$rs = "<p><a href=$_SERVER['PHP_SELF']>Back to Diary</a><br>";
+$rs = "<p><a href=$filename>Back to Diary</a><br>";
 
 //diary search
 if(isset($term)) {
-	$text .= search_the_db($term,$can_do_stop,"diary",$_SERVER['PHP_SELF'],"entry");
+	$text .= search_the_db($term,$can_do_stop,"diary",$filename,"entry");
 	print_page("Diary Search",$text);
 	if(empty($ret_text)){ //no results found
 		$text .= "<br>There are no entries of <b class=b1>$term</b> in your diary. Please broaden your search.<br><br>";
@@ -66,11 +66,11 @@ if(isset($delete)) { //delete single
 } elseif(isset($delete_all)){ //delete all
 	if(!isset($sure)) {
 		get_var('Delete all','diary.php',"Are you sure you want to delete all entries in your diary?",'sure','yes');
-		$rs = "<a href=$_SERVER['PHP_SELF']>Back to Diary</a>";
+		$rs = "<a href=$filename>Back to Diary</a>";
 	} else{
 		dbn("delete from {$db_name}_diary where login_id = '$user[login_id]'");
 		$text .= "Diary Successfully Emptied.<p>";
-		$rs = "<a href=$_SERVER['PHP_SELF']>Back to Diary</a>";
+		$rs = "<a href=$filename>Back to Diary</a>";
 	}
 }elseif(isset($del_select)){ //delete selected
 	if(empty($del_ent)){
@@ -120,7 +120,7 @@ if($user['login_id'] == ADMIN_ID){
 
 if(!$num_ent[0]){//no entries in diary
 	if($num_ent[0] < $max) {
-		$text .= "<p><br><a href=$_SERVER['PHP_SELF']?add=1>Add entry</a>";
+		$text .= "<p><br><a href=$filename?add=1>Add entry</a>";
 	} else {
 		$text .= "<br>Your diary is full";
 	}
