@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: se_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-solarempire}
+      MYSQL_USER: ${DB_USER:-solarempire}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-solarempire}
+      SE_GAME_NAME: ${SE_GAME_NAME:-game1}
+      SE_GAME_DISPLAY_NAME: ${SE_GAME_DISPLAY_NAME:-Solar Empire}
+      SE_ADMIN_PASSWORD: ${SE_ADMIN_PASSWORD:-passwd}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docs/sql/new_server.sql:/docker-entrypoint-initdb.d/01_new_server.sql:ro
+      - ./docs/sql/new_game.sql:/docker-entrypoint-initdb.d/new_game.sql:ro
+      - ./docker/mysql/init/02_new_game.sh:/docker-entrypoint-initdb.d/02_new_game.sh:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      args:
+        REPO_URL: ${REPO_URL:-https://github.com/StevenG916/SolarEmpireReborn.git}
+        REPO_BRANCH: ${REPO_BRANCH:-main}
+    container_name: se_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-solarempire}
+      DB_USER: ${DB_USER:-solarempire}
+      DB_PASSWORD: ${DB_PASSWORD:-solarempire}
+      SERVER_NAME: ${SERVER_NAME:-My Solar Empire Server}
+      SEND_MAIL: ${SEND_MAIL:-0}
+    volumes:
+      - map_images:/var/www/html/img
+    ports:
+      - "${PORT:-8080}:80"
+
+volumes:
+  db_data:
+  map_images:
