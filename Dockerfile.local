@@ -1,0 +1,42 @@
+FROM php:8.3-apache
+
+# Install PHP extensions and cron
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    cron \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd mysqli \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Copy local files into the web root
+COPY . /var/www/html/
+
+# Make sure the img directory is writable for map generation
+RUN mkdir -p /var/www/html/img \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 775 /var/www/html/img
+
+# Set up cron jobs for maintenance scripts
+RUN echo "0 * * * * www-data php /var/www/html/run_hourly.php >> /var/log/se_hourly.log 2>&1" > /etc/cron.d/solar-empire \
+    && echo "0 0 * * * www-data php /var/www/html/run_daily.php  >> /var/log/se_daily.log  2>&1" >> /etc/cron.d/solar-empire \
+    && chmod 0644 /etc/cron.d/solar-empire
+
+# PHP tuning
+RUN echo "upload_max_filesize = 16M"        >> /usr/local/etc/php/conf.d/se.ini \
+    && echo "post_max_size = 16M"           >> /usr/local/etc/php/conf.d/se.ini \
+    && echo "max_execution_time = 120"      >> /usr/local/etc/php/conf.d/se.ini \
+    && echo "session.gc_maxlifetime = 7200" >> /usr/local/etc/php/conf.d/se.ini
+
+# Copy entrypoint
+RUN cp /var/www/html/docker/entrypoint.sh /entrypoint.sh \
+    && chmod +x /entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/entrypoint.sh"]

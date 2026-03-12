@@ -25,7 +25,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
     container_name: se_app
     restart: unless-stopped
     depends_on:
