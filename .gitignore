@@ -1,3 +1,20 @@
+# Environment / secrets
 .env
-img/*/
+
+# Docker deploy compose (not needed in repo)
+docker-compose.deploy.yml
+
+# Game-generated map images (written at runtime by build_universe.php)
+img/game*/
+img/maps/
+
+# Logs
 *.log
+
+# Old Perl scripts
+*.pl.old
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini

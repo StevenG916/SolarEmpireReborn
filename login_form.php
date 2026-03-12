@@ -11,7 +11,7 @@ print_header('Welcome to Solar Empire');
 	<h2>Login or sign-up</h2>
 	<p><label for="l_name">Login Name:</label><br />
 	<input type="text" name="l_name" id="l_name" value="<?php
-print esc($login_name); ?>" class="text" /></p>
+print esc($_POST['l_name'] ?? ''); ?>" class="text" /></p>
 	<p><label for="passwd">Password:</label><br />
 	<input type="password" name="passwd" id="passwd" class="text" /></p>
 	<p><input type="submit" value="Login" /></p>

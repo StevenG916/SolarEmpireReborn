@@ -25,9 +25,7 @@ services:
   app:
     build:
       context: .
-      args:
-        REPO_URL: ${REPO_URL:-https://github.com/StevenG916/SolarEmpireReborn.git}
-        REPO_BRANCH: ${REPO_BRANCH:-main}
+      dockerfile: Dockerfile
     container_name: se_app
     restart: unless-stopped
     depends_on:

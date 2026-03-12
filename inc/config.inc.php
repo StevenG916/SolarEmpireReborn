@@ -13,8 +13,10 @@ define("SENDMail", getenv('SEND_MAIL') ? (int)getenv('SEND_MAIL') : 0);
 define("SERVER_NAME", getenv('SERVER_NAME') ?: "My Solar Empire Server");
 
 if (isset($_SERVER['HTTP_HOST'])) {
-	define('URL_SHORT', dirname($_SERVER['SCRIPT_NAME']));
-	define('URL_FULL', 'http://' . $_SERVER['HTTP_HOST'] . URL_SHORT);
+	$_url_short = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+	define('URL_SHORT', $_url_short);
+	define('URL_FULL', 'http://' . $_SERVER['HTTP_HOST'] . $_url_short);
+	unset($_url_short);
 }
 
 $code_base = 'Generic SE 2.9.1';

@@ -342,7 +342,7 @@ function score_func($login_id, $full)
 	global $score_method, $db_name;
 
 	if ($full != 1) {
-		db("select value from ${db_name}_db_vars where name = 'score_method'");
+		db("select value from {$db_name}_db_vars where name = 'score_method'");
 		$alpha_var = dbr();
 		$score_method = $alpha_var['value'];
 		$extra_text = "login_id = '$login_id'";
