@@ -46,7 +46,7 @@ while (list($game) = mysqli_fetch_row($games)) {
         $warn = mysqli_query($maint_link, 'SELECT `s`.`login_id`, `s`.`login_name` FROM ' .
             "`{$game}_ships` AS `s`, `{$game}_users` AS `u` WHERE `s`.`location` " .
             "= 1 && `s`.`login_id` > 3 && `u`.`turns_run` > $safeTurns && " .
-            "`u`.`login_id` = `s`.`login_id` && `s`.`ship_id` != 1 GROUP BY `u`.`login_id`");
+            "`u`.`login_id` = `s`.`login_id` && `s`.`ship_id` != 1 GROUP BY `u`.`login_id`, `s`.`login_name`");
 
         while (list($id, $name) = mysqli_fetch_row($warn)) {
             $escapedWarning = mysqli_real_escape_string($maint_link, sprintf($warning, $id, $name));

@@ -1051,7 +1051,7 @@ unset($ships);
 
 /* SHOW SUMMARY OF USER SHIPS */
 } else {
-	db2("select count(ship_id) as total, sum(fighters) as fighters, avg(towed_by) as group_tow,class_name, config,shipclass from {$db_name}_ships where location = $user[location] && ship_id > 1 && login_id = $user[login_id] && ship_id != '$user[ship_id]' group by class_name order by total desc, fighters desc");
+	db2("select count(ship_id) as total, sum(fighters) as fighters, avg(towed_by) as group_tow,class_name, config,shipclass from {$db_name}_ships where location = $user[location] && ship_id > 1 && login_id = $user[login_id] && ship_id != '$user[ship_id]' group by class_name, config, shipclass order by total desc, fighters desc");
 	$ships = dbr2(1);
 	if(!$ships){
 		$error_str .= "<p>You are commanding the only ship you have in this system.</p>";
@@ -1163,7 +1163,7 @@ if ($user['show_enemy_ships'] == 1) {
 
 /* SHOW SUMMARY OF ENEMY SHIPS	*/
 } else {
-	db2("select count(s.ship_id) as total, sum(s.fighters) as fighters, s.login_id, s.login_name, u.clan_id, u.clan_sym, u.clan_sym_color, u.turns_run from {$db_name}_ships s  LEFT JOIN  {$db_name}_users u ON u.login_id = s.login_id WHERE `s`.`location` = '$user[location]' && `s`.`ship_id` > 1 && `s`.`login_id` != '$user[login_id]' group by login_id order by total,s.login_name");
+	db2("select count(s.ship_id) as total, sum(s.fighters) as fighters, s.login_id, s.login_name, u.clan_id, u.clan_sym, u.clan_sym_color, u.turns_run from {$db_name}_ships s  LEFT JOIN  {$db_name}_users u ON u.login_id = s.login_id WHERE `s`.`location` = '$user[location]' && `s`.`ship_id` > 1 && `s`.`login_id` != '$user[login_id]' group by s.login_id, s.login_name, u.clan_id, u.clan_sym, u.clan_sym_color, u.turns_run order by total,s.login_name");
 	$ships = dbr2();
 	if(!$ships){
 		$error_str .= "<p>There are no other ships in this system.</p>\n";

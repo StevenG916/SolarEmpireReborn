@@ -305,7 +305,7 @@ if(!isset($ranking)){
 		}
 
 		#get details of each clan
-		db2("select c.clan_id,c.clan_name,c.symbol,c.sym_color, count(u.login_id) as members, sum(u.fighters_killed) as fkilled, sum(u.fighters_lost) as flost, sum(u.ships_killed) as skilled, sum(u.ships_lost) as slost, sum(u.turns_run) as trun, sum(u.score) as score from {$db_name}_clans c, {$db_name}_users u where u.clan_id = c.clan_id GROUP by c.clan_id order by $order_by_sql $order_dir");
+		db2("select c.clan_id,c.clan_name,c.symbol,c.sym_color, count(u.login_id) as members, sum(u.fighters_killed) as fkilled, sum(u.fighters_lost) as flost, sum(u.ships_killed) as skilled, sum(u.ships_lost) as slost, sum(u.turns_run) as trun, sum(u.score) as score from {$db_name}_clans c, {$db_name}_users u where u.clan_id = c.clan_id GROUP by c.clan_id, c.clan_name, c.symbol, c.sym_color order by $order_by_sql $order_dir");
 		$clan = dbr2(1);
 
 
@@ -658,7 +658,7 @@ if(isset($changepass)) {// change password
 	* Summary of Clan ships
 	**************/
 	} else {
-		db("select count(ship_id) as total, sum(fighters) as fighters, login_name from {$db_name}_ships where clan_id = $user[clan_id] group by login_id order by login_name, fighters desc, ship_name desc");
+		db("select count(ship_id) as total, sum(fighters) as fighters, login_name from {$db_name}_ships where clan_id = $user[clan_id] group by login_id, login_name order by login_name, fighters desc");
 		$clan_ship = dbr(1);
 
 		$error_str .= "<br><br><a href=clan.php?show_clan_ships=1>Show All Clan Ships</a><p>";
