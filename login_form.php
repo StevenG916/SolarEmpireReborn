@@ -26,9 +26,9 @@ print esc($_POST['l_name'] ?? ''); ?>" class="text" /></p>
 <p>A quote from a player: <q>I sure wish work would quit cutting into my
 gaming time</q>.</p>
 
-<p><a href="http://sourceforge.net/projects/solar-empire/">Solar Empire</a> is
-an open source project -
-<a href="http://sourceforge.net/news/?group_id=16534">Development News</a></p>
+<p><a href="http://sourceforge.net/projects/solar-empire/">Original Solar Empire</a> (SourceForge) |
+<a href="https://github.com/StevenG916/SolarEmpireReborn">Solar Empire Reborn</a> (GitHub)</p>
+<p>Solar Empire is open source &mdash; host your own server!</p>
 </div>
 <?php
 
